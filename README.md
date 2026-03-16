@@ -48,33 +48,34 @@ We will 3D print the entire enclosure and knobs for the etch-a-sketch. We will n
 
 | ID         | Description                                                                                                                                                                               |
 | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **SRS-01** | The device shall display and persist user-drawn lines on the display; the cursor shall remain at the boundary of the screen if a user attempts to move it beyond the display coordinates. |
-| **SRS-02** | The system shall update the cursor position based on simultaneous inputs from both knobs to facilitate diagonal and curved line rendering.                                                |
-| **SRS-03** | The system shall respond to knob rotations with a display latency of less than 50 milliseconds to ensure real-time user interaction.                                                      |
+| **SRS-01** | The device shall display and persist user-drawn lines on the display. The cursor shall remain at the boundary of the screen if a user attempts to move it beyond the display coordinates. |
+| **SRS-02** | The system shall update the cursor position based on simultaneous inputs from both knobs to do diagonal and curved line rendering.                                                        |
+| **SRS-03** | The system shall respond to knob rotations with a display latency of less than 100 milliseconds to ensure real-time user interaction.                                                     |
 | **SRS-04** | Upon USB connection to a host PC, the device shall enumerate as a Human Interface Device (HID) and map knob rotations to mouse-drag and click events.                                     |
-| **SRS-05** | The system shall monitor the 3-axis accelerometer and trigger a screen-clear event only when a continuous shaking motion is detected for a duration exceeding 2 seconds.                  |
+| **SRS-05** | The system shall monitor the IMU and trigger a screen-clear event only when a continuous shaking motion is detected for a duration exceeding 1 second.                                    |
 | **SRS-06** | The system shall change the active drawing color between black and red upon a toggle of the color mode switch, while maintaining the color of previously drawn lines.                     |
-
----
 
 ### 6. Hardware Requirements Specification (HRS)
 
 **6.1 Definitions, Abbreviations**
 
+- **USB:** Universal Serial Bus
+- **PC:** Personal Computer
 - **HID:** Human Interface Device
 - **IMU:** Inertial Measurement Unit
-- **USB-C:** Universal Serial Bus Type-C
 
 **6.2 Functionality**
 
-| ID         | Description                                                                                                                                                                     |
-| :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **HRS-01** | The device shall be powered by a 9V Alkaline battery and maintain operation for a minimum of 60 minutes under continuous use.                                                   |
-| **HRS-02** | The power management circuit shall maintain uninterrupted system operation during the transition of plugging or unplugging a USB-C cable.                                       |
-| **HRS-03** | A physical power switch shall be integrated to disconnect the battery from all downstream circuitry, resulting in zero current draw (excluding natural battery self-discharge). |
-| **HRS-04** | The device enclosure shall feature two rotary inputs (knobs) positioned at the bottom corners of the display to emulate a mechanical drawing toy.                               |
-| **HRS-05** | The rotary encoders used for knobs shall be non-detented to provide smooth, continuous rotation without tactile clicks or bumps.                                                |
-| **HRS-06** | The device chassis and internal component mounting shall withstand a 2G shaking force without loss of electrical connectivity or functional failure.                            |
+| ID         | Description                                                                                                                                                                |
+| :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **HRS-01** | The device shall be powered by a 9V Alkaline battery and maintain operation for a minimum of 10 minutes under continuous use.                                              |
+| **HRS-02** | The power management circuit shall maintain uninterrupted system operation during the transition of plugging or unplugging a USB-C cable.                                  |
+| **HRS-03** | A physical power switch shall be integrated to disconnect the battery from all downstream circuitry, resulting in zero current draw (excluding ambient battery discharge). |
+| **HRS-04** | The device enclosure shall feature two knobs positioned at the bottom corners of the display to emulate a mechanical drawing toy.                                          |
+| **HRS-05** | The rotary encoders used for knobs shall be non-detented to provide smooth, continuous rotation without tactile clicks or bumps.                                           |
+| **HRS-06** | The device chassis and internal component mounting shall withstand shaking without loss of electrical connectivity or functional failure.                                  |
+
+_Note: we used Gemini to format the requirements._
 
 ### 7. Bill of Materials (BOM)
 
