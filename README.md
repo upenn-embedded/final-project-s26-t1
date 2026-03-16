@@ -31,7 +31,9 @@ The goal of this project is to expand what an etch-a-sketch can be while also re
 ![alt text](system_diagram.png)
 
 **Key**
+
 Red: Regulated 5V
+
 Yellow: Regulated 3.3V
 
 ### 4. Design Sketches
