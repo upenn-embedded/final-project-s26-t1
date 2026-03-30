@@ -1,0 +1,9 @@
+_site
+.sass-cache
+.jekyll-cache
+.jekyll-metadata
+vendor
+.bundle
+
+# standard to ignore for Github Pages deployment for some reason
+Gemfile.lock
