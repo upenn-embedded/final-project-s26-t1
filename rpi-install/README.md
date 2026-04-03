@@ -24,8 +24,7 @@ nvme0n1                                       259:0    0 931.5G  0 disk
 ```
 7. In my case, the disk I need to flash is `sda`, which I can tell based off the size (64GB microSD card)
 8. flash the SD card: `sudo dd if=result/sd-image/$(ls result/sd-image/) of=/dev/sdX bs=4M status=progress oflag=direct` (replace `sdX` with the drive you determined you need to flash). BE CAREFUL TO NOT OVERWRITE ANYTHING YOU WANT TO KEEP
-9. unmount the SD card to ensure no writes to the drive remain in cache: `umount /dev/sdX` (replace `sdX` with the drive you flashed)
-10. put the SD card back into the Raspberry Pi
+9. put the SD card back into the Raspberry Pi
 
 # Post-Install State
  * Automatically connect's to AirPennNet-Device (you will have to register your device's MAC address to get it authorized to the network - you can find you mac address with `ip link` and look for the one associated with `wlan0`)
