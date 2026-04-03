@@ -1,30 +1,22 @@
-/*
- * ESE519_Lab4_Pong_Starter.c
- *
- * Created: 9/21/2021 21:21:21 AM
- * Author : J. Ye
- */ 
-
 #define F_CPU 16000000UL
-#define joystick_pin_x DDRC5
-#define joystick_pin_y DDRC4
-
-#define LED1_pin DDRD0
-#define LED2_pin DDRD1
+#define joystick_pin_x DDRC0
+#define joystick_pin_y DDRC1
 
 #define clear_pin DDRC2
+
+#define MAX_ADC_VALUE 1023
 
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "ST7735.h"
-#include "LCD_GFX.h"
-#include "uart.h"
+#include "lib/ST7735.h"
+#include "lib/LCD_GFX.h"
+#include "lib/uart.h"
 #include <util/delay.h>
 
 #include <stdio.h>
 
-uint16_t joystick_center = 500;
+int joystick_center = 512;
 
 uint16_t color = 0;
 
@@ -40,20 +32,16 @@ void ADC_init(void) {
 
 void Initialize()
 {
+    uart_init();
+    
 	lcd_init();
 
     // Set paddle control pins as analog input
     ADC_init();
 
-    // Set LED pins as output
-    DDRD |= (1 << LED1_pin) | (1 << LED2_pin);
-
     // Set clear pin as input with pull-up
     DDRC &= ~(1 << clear_pin);
     PORTC |= (1 << clear_pin);
-
-    // Initialize LEDs to off
-    PORTD &= ~((1 << LED1_pin) | (1 << LED2_pin));
 }
 
 
@@ -67,28 +55,33 @@ uint16_t ADC_read(uint8_t channel) {
     return ADC;
 }
 
-int get_joystick_x_value() {
-    int value = ADC_read(joystick_pin_x);
-
-    return (value - joystick_center )/ 50;
+float scale_joystick(int adc_value) {
+    float scaled = ((float) adc_value) / ((float) MAX_ADC_VALUE) * 2.0 - 1.0;
+    return (scaled < 0.06 && scaled > -0.06) ? 0.0 : scaled;
 }
 
-int get_joystick_y_value() {
+float get_joystick_x_value() {
+    int value = ADC_read(joystick_pin_x);
+
+    return scale_joystick(value);
+}
+
+float get_joystick_y_value() {
     int value = ADC_read(joystick_pin_y);
 
-    return (value - joystick_center )/ 50;
+    return scale_joystick(value);
 }
 
 void update_cursor(int new_x, int new_y){
-    if (new_y > LCD_HEIGHT) {
-        new_y = LCD_HEIGHT;
+    if (new_y >= LCD_HEIGHT) {
+        new_y = LCD_HEIGHT - 1;
     }
     if (new_y < 0) {
         new_y = 0; 
     }
 
-    if (new_x > LCD_WIDTH) {
-        new_x = LCD_WIDTH;
+    if (new_x >= LCD_WIDTH) {
+        new_x = LCD_WIDTH - 1;
     }
     if (new_x < 0) {
         new_x = 0;
@@ -118,8 +111,10 @@ int main(void)
             LCD_setScreen(rgb565(255, 255, 255)); // Clear screen
         }
 
-        int get_x_change = get_joystick_x_value();
-        int get_y_change = get_joystick_y_value();
+        float get_x_change = get_joystick_x_value() * 3.0;
+        float get_y_change = get_joystick_y_value() * 3.0;
+        
+        printf("%f %f\n", get_x_change, get_y_change);
 
         int new_x = cursor_x + get_x_change;
         int new_y = cursor_y + get_y_change;
