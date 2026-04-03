@@ -107,10 +107,23 @@ The device is battery powered, so it’s sufficient to just have some table spac
 ## Sprint Review #1
 
 ### Last week's progress
+* Ordered parts from Mouser and Amazon as well as the eInk display from Crowd Supply.
+* Wrote code for and successfully tested a simple etch-a-sketch using Lab 4 parts. We don't plan on using the Lab 4 display due to its small size or the joystick for it, but this gives us a starting point while we wait for parts to arrive.
+* Set up AVR64DU32 in MPLAB X IDE. We have tested USB HID functionality using Microchip's demo.
+* Wrote a simple program using Microchip Code Configurator for the AVR64DU32 to test I2C communication with the IMU.
+* Acquired a Raspberry Pi 4B with 6" touchscreen display from Detkin staff.
+* Set up reproducible RPI image using NixOS. It boots but the screen doesn't work yet.
 
 ### Current state of project
+* Etch-a-sketch proof of concept using Lab 4 joystick and display
+* Working USB HID and I2C on the AVR64DU32 Curiousity Nano
+* RPI for driving display is working but only insofar as it boots
 
 ### Next week's plan
+* Port proof of concept from ATMega328PB to AVR64DU32
+* Add shake detection using IMU with AVR64DU32
+* Get RPI image working with display
+* Replace joystick with rotary encoder dials (assuming they arrive before the end of the week)
 
 ## Sprint Review #2
 
