@@ -27,7 +27,7 @@ nvme0n1                                       259:0    0 931.5G  0 disk
 9. put the SD card back into the Raspberry Pi
 
 # Post-Install State
- * Automatically connect's to AirPennNet-Device (you will have to register your device's MAC address to get it authorized to the network - you can find you mac address with `ip link` and look for the one associated with `wlan0`)
+ * Automatically connects to AirPennNet-Device (you will have to register your device's MAC address to get it authorized to the network - you can find you mac address with `ip link` and look for the one associated with `wlan0`)
  * Automatically logs into all TTYs as `root`
  * `root` password is secret, but is already pre-set
  * OpenSSH open on all network interfaces with password login into `root`
