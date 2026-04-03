@@ -1,0 +1,28 @@
+This is the code we use to create the image to flash onto the Raspberry Pi Model 4 B
+
+# Plan
+Use NixOS to create a reproducible image
+
+# Installation Instructions
+1. Clone this repository: `git clone https://github.com/upenn-embedded/final-project-s26-t1.git`
+2. cd into the repository: `cd final-project-s26-t1`
+3. ensure you have [nix](https://nixos.org/download/) installed
+4. build the image: `nix build .#packages.aarch64-linux.rpi4B-iso` (you may have to enable cross-compiling for `aarch64-linux` - I'm on NixOS with cross compilation enabled in my system config, so it just works for me)
+5. plug-in the SD card into your system
+6. Figure out which `disk` you need to flash (BE CAREFUL): `lsblk`
+```
+NAME                                          MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINTS
+sda                                             8:0    1  58.3G  0 disk
+├─sda1                                          8:1    1   512M  0 part
+└─sda2                                          8:2    1  57.8G  0 part
+nvme0n1                                       259:0    0 931.5G  0 disk
+├─nvme0n1p1                                   259:1    0 443.6G  0 part
+│ └─luks-c705edf8-6321-4956-8780-f6c00a62e77e 254:0    0 443.6G  0 crypt /home
+├─nvme0n1p5                                   259:2    0  96.8G  0 part
+├─nvme0n1p6                                   259:3    0   512M  0 part  /boot
+└─nvme0n1p7                                   259:4    0 390.6G  0 part  /nix/store`
+```
+7. In my case, the disk I need to flash is `sda`, which I can tell based off the size (64GB microSD card)
+8. flash the SD card: `sudo dd if=result/sd-image/$(ls result/sd-image/) of=/dev/sdX bs=4M status=progress oflag=direct` (replace `sdX` with the drive you determined you need to flash). BE CAREFUL TO NOT OVERWRITE ANYTHING YOU WANT TO KEEP
+9. unmount the SD card to ensure no writes to the drive remain in cache: `umount /dev/sdX` (replace `sdX` with the drive you flashed)
+10. put the SD card back into the Raspberry Pi

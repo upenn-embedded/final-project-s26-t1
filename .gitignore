@@ -22,3 +22,6 @@
 *.atsuo
 /build/
 /dist/
+
+# Nix Build Artifacts
+result
