@@ -26,3 +26,17 @@ nvme0n1                                       259:0    0 931.5G  0 disk
 8. flash the SD card: `sudo dd if=result/sd-image/$(ls result/sd-image/) of=/dev/sdX bs=4M status=progress oflag=direct` (replace `sdX` with the drive you determined you need to flash). BE CAREFUL TO NOT OVERWRITE ANYTHING YOU WANT TO KEEP
 9. unmount the SD card to ensure no writes to the drive remain in cache: `umount /dev/sdX` (replace `sdX` with the drive you flashed)
 10. put the SD card back into the Raspberry Pi
+
+# Post-Install State
+ * Automatically connect's to AirPennNet-Device (you will have to register your device's MAC address to get it authorized to the network - you can find you mac address with `ip link` and look for the one associated with `wlan0`)
+ * Automatically logs into all TTYs as `root`
+ * `root` password is secret, but is already pre-set
+ * OpenSSH open on all network interfaces with password login into `root`
+ * Some utility packages pre-installed like `htop`, `neovim`, and `fastfetch`
+ * Publishes itself to the local network through `avahi` (which you may also have to install) as `etch-a-sketch.local`
+
+# Development Tips
+* **connect via ssh**: `ssh root@etch-a-sketch.local`
+* **update configuration remotely without re-flashing**
+    * NixOS Machines: `nixos-rebuild switch --flake .#etch-a-sketch --target-host root@etch-a-sketch.local`
+    * idk: https://github.com/NixOS/nixpkgs/issues/44135
