@@ -10,9 +10,6 @@
     pkgs = import nixpkgs {
       system = "x86_64-linux";
     };
-    pkgs-rpi = import nixpkgs {
-      system = "aarch64-linux";
-    };
   in
   {
     devShells.x86_64-linux.default = pkgs.mkShell {
@@ -24,8 +21,8 @@
 
     nixosConfigurations.etch-a-sketch = nixpkgs.lib.nixosSystem {
       system = "aarch64-linux";
+      specialArgs = { inherit inputs; };
       modules = [
-        "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix" # goofy
         ./rpi-install/configuration.nix
       ];
     };

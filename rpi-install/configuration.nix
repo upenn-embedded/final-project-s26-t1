@@ -1,6 +1,13 @@
-{pkgs, ...}:
+{pkgs, inputs, ...}:
 {
+  imports = [
+    "${inputs.nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+  ];
+
   sdImage.compressImage = false;
+
+  boot.kernelPackages = pkgs.linuxPackages_rpi4;
+  boot.initrd.allowMissingModules = true; # For some reason, dw-hdmi modules
 
   time.timeZone = "America/New_York";
   i18n.defaultLocale = "en_US.UTF-8";
@@ -42,14 +49,18 @@
     settings.PermitRootLogin = "yes";
   };
 
-  # include this repo on device
-  environment.etc."nixos".source = ../.;
-
   users.users.root.hashedPassword = "$y$j9T$vfWlA2GOwpoLw72VuZ/g..$pyshG8GdIFO4GiPlTN8heKK.pBCNrrL7ZUc1GYbXzd3";
   services.getty.autologinUser = "root";
 
   environment.systemPackages = with pkgs; [
     fastfetch
+    htop
+    neovim
+  ];
+
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
   ];
 
   system.stateVersion = "25.11"; 
