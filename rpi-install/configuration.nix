@@ -63,6 +63,7 @@
     "flakes"
   ];
 
+  # Make hostname discoverable on local network
   services.avahi = {
     enable = true;
     nssmdns4 = true;
