@@ -47,7 +47,7 @@
       };
 
     overlays.default = final: prev: {
-      niri = self.packages.${prev.system}.niri;
+      niri = self.packages.${prev.stdenv.hostPlatform.system}.niri;
     };
   };
 }
