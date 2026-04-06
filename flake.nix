@@ -7,17 +7,20 @@
 
   outputs = { self, nixpkgs, ... }@inputs:
   let
-    pkgs = import nixpkgs {
-      system = "x86_64-linux";
-    };
+    forAllSystems = with nixpkgs.lib; genAttrs [
+      "x86_64-linux"
+      "aarch64-linux"
+    ];
   in
   {
-    devShells.x86_64-linux.default = pkgs.mkShell {
-      buildInputs = [
-        pkgs.jekyll
-        pkgs.bundler
-      ];
-    };
+    devShells = forAllSystems (system: {
+      default = let pkgs = import nixpkgs { inherit system; }; in pkgs.mkShell {
+        buildInputs = [
+          pkgs.jekyll
+          pkgs.bundler
+        ];
+      };
+    });
 
     nixosConfigurations.etch-a-sketch = nixpkgs.lib.nixosSystem {
       system = "aarch64-linux";
