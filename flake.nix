@@ -7,6 +7,7 @@
       url = "github:BirdeeHub/nix-wrapper-modules";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-hardware.url = "github:nixos/nixos-hardware/master";
   };
 
   outputs = { self, nixpkgs, wrappers, ... }@inputs:
