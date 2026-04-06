@@ -23,6 +23,7 @@
       system = "aarch64-linux";
       specialArgs = { inherit inputs; };
       modules = [
+        ./rpi-install/rpi4.nix
         ./rpi-install/configuration.nix
       ];
     };

@@ -6,9 +6,6 @@
 
   sdImage.compressImage = false;
 
-  boot.kernelPackages = pkgs.linuxPackages_rpi4;
-  boot.initrd.allowMissingModules = true; # For some reason, dw-hdmi modules
-
   time.timeZone = "America/New_York";
   i18n.defaultLocale = "en_US.UTF-8";
 
