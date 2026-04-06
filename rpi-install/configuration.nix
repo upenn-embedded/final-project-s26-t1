@@ -1,7 +1,13 @@
-{pkgs, inputs, ...}:
+{self, pkgs, inputs, ...}:
 {
   imports = [
     "${inputs.nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+    ./desktop.nix
+  ];
+
+  # Apply custom configurations for packages like niri
+  nixpkgs.overlays = [
+    self.overlays.default
   ];
 
   sdImage.compressImage = false;
@@ -47,7 +53,17 @@
   };
 
   users.users.root.hashedPassword = "$y$j9T$vfWlA2GOwpoLw72VuZ/g..$pyshG8GdIFO4GiPlTN8heKK.pBCNrrL7ZUc1GYbXzd3";
-  services.getty.autologinUser = "root";
+
+  users.users.etchy = {
+    isNormalUser = true;
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+    ];
+    hashedPassword = "$y$j9T$vfWlA2GOwpoLw72VuZ/g..$pyshG8GdIFO4GiPlTN8heKK.pBCNrrL7ZUc1GYbXzd3";
+  };
+
+  services.getty.autologinUser = "etchy";
 
   environment.systemPackages = with pkgs; [
     fastfetch

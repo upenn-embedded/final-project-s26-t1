@@ -35,13 +35,19 @@
       ];
     };
 
-    packages = forAllSystems (system: {
-      niri = wrappers.wrappers.niri.wrap ({...}: {
-        pkgs = import nixpkgs { inherit system; };
-        imports = [ ./packages/niri.nix ];
-      });
-    }) // {
-      aarch64-linux.rpi4B-iso = self.nixosConfigurations.etch-a-sketch.config.system.build.sdImage;
+    packages = nixpkgs.lib.recursiveUpdate
+      (forAllSystems (system: {
+        niri = wrappers.wrappers.niri.wrap ({...}: {
+          pkgs = import nixpkgs { inherit system; };
+          imports = [ ./packages/niri.nix ];
+        });
+      }))
+      {
+        aarch64-linux.rpi4B-iso = self.nixosConfigurations.etch-a-sketch.config.system.build.sdImage;
+      };
+
+    overlays.default = final: prev: {
+      niri = self.packages.${prev.system}.niri;
     };
   };
 }
