@@ -46,11 +46,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775535593,
-        "narHash": "sha256-p3blQQEKGCmUH/IhLdD3rMj1eEqdtSwF5No26UFLz7k=",
+        "lastModified": 1775571821,
+        "narHash": "sha256-ZxMECmbyc03n0q9NRX57s6PJau60gpPtYQ4e3cRLs5Q=",
         "owner": "clay53",
         "repo": "nix-wrapper-modules",
-        "rev": "e84b3d2947202f478cb2069d5d59be612f35e916",
+        "rev": "4172ba517c0fa0bcf526cdfa6577aa694c56da87",
         "type": "github"
       },
       "original": {
