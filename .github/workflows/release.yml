@@ -1,9 +1,10 @@
 name: "RPI 4B Image"
 on:
-  pull_request:
   push:
+    tags:
+    - '*'
 jobs:
-  tests:
+  rpi4-img:
     runs-on: ubuntu-24.04-arm
     steps:
     - uses: actions/checkout@v5
@@ -11,3 +12,6 @@ jobs:
       with:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
     - run: nix build .#packages.aarch64-linux.rpi4B-iso
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: "result/sd-image/*"
