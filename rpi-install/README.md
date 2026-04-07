@@ -36,6 +36,8 @@ nvme0n1                                       259:0    0 931.5G  0 disk
 
 # Development Tips
 * **connect via ssh**: `ssh root@etch-a-sketch.local`
+* **"remember" etch-a-sketch password**: `ssh-copy-id root@etch-a-sketch.local`
 * **update configuration remotely without re-flashing**
     * NixOS Machines: `nixos-rebuild switch --flake .#etch-a-sketch --target-host root@etch-a-sketch.local`
     * idk: https://github.com/NixOS/nixpkgs/issues/44135
+* **test desktop configuration locally** (Wayland only): `nix run .#niri-wrapped` (nicer if go to different TTY: `Ctrl+Alt+F#`)
