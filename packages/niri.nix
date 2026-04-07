@@ -42,5 +42,19 @@
     gestures = {
       hot-corners.off = [];
     };
+
+    cursor = {
+      xcursor-theme = "Yaru";
+      xcursor-size = 8;
+    };
   };
+
+  prefixVar = [
+    # Make cursor theme discoverable
+    [
+      "XCURSOR_PATH"
+      ":"
+      "${pkgs.yaru-theme}/share/icons"
+    ]
+  ];
 }
