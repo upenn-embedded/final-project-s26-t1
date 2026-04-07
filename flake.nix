@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     wrappers = {
-      url = "github:BirdeeHub/nix-wrapper-modules";
+      url = "github:clay53/nix-wrapper-modules/eww-init";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-hardware.url = "github:nixos/nixos-hardware/master";
@@ -38,9 +38,19 @@
 
     packages = nixpkgs.lib.recursiveUpdate
       (forAllSystems (system: {
-        niri = wrappers.wrappers.niri.wrap ({...}: {
-          pkgs = import nixpkgs { inherit system; };
+        niri-wrapped = wrappers.wrappers.niri.wrap ({...}: {
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ self.overlays.default ];
+          };
           imports = [ ./packages/niri.nix ];
+        });
+        eww-wrapped = wrappers.wrappers.eww.wrap ({...}: {
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ self.overlays.default ];
+          };
+          imports = [ ./packages/eww.nix ];
         });
       }))
       {
@@ -48,7 +58,8 @@
       };
 
     overlays.default = final: prev: {
-      niri = self.packages.${prev.stdenv.hostPlatform.system}.niri;
+      niri-wrapped = self.packages.${prev.stdenv.hostPlatform.system}.niri-wrapped;
+      eww-wrapped = self.packages.${prev.stdenv.hostPlatform.system}.eww-wrapped;
     };
   };
 }

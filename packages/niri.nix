@@ -9,7 +9,7 @@
       };
       "Mod+Return" = {
         "spawn" = [
-          "${pkgs.lib.getExe pkgs.alacritty}"
+          "alacritty"
         ];
       };
       "Mod+Q" = {
@@ -47,6 +47,10 @@
       xcursor-theme = "Yaru";
       xcursor-size = 8;
     };
+
+    spawn-sh-at-startup = [
+      "eww daemon && eww open draw"
+    ];
   };
 
   prefixVar =
@@ -54,6 +58,7 @@
     # Programs that must be available to Niri environment
     envPackages = [
       pkgs.alacritty
+      pkgs.eww-wrapped
     ]; 
   in
   ([
