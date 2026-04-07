@@ -65,7 +65,8 @@ in
       :focusable "none"
         (button
           :onclick "alacritty -e 'nmtui' &"
-            "Draw"))
+            (image
+              :path "${../assets/etch-a-sketch.svg}")))
 
     (defwindow files [screen_width screen_height scale]
       :monitor 0
