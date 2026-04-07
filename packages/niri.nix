@@ -1,6 +1,11 @@
 # Nix Settings Format: https://birdeehub.github.io/nix-wrapper-modules/wrapperModules/niri.html
 # Niri Config Wiki: https://github.com/niri-wm/niri/wiki/Getting-Started
-{pkgs, ...}:
+{pkgs, lib, ...}:
+let
+  getWidthBash = "wlr-randr | awk '/current/ {print $1; exit}' | cut -d'x' -f1";
+  getHeightBash = "wlr-randr | awk '/current/ {print $1; exit}' | cut -d'x' -f2";
+  getScale = "wlr-randr | awk '/Scale:/ {print $2; exit}'";
+in
 {
   settings = {
     binds = {
@@ -36,7 +41,7 @@
     };
 
     layout = {
-      background-color = "#bfbfc1";
+      background-color = "#ffffff";
     };
 
     gestures = {
@@ -49,7 +54,7 @@
     };
 
     spawn-sh-at-startup = [
-      "eww daemon && eww open draw"
+      "eww open-many draw files time help storage sync wifi credits --arg screen_width=$(${getWidthBash}) --arg screen_height=$(${getHeightBash}) --arg scale=$(${getScale}) --restart"
     ];
   };
 
@@ -57,6 +62,10 @@
   let
     # Programs that must be available to Niri environment
     envPackages = [
+      pkgs.wlr-randr
+      pkgs.gawk
+      pkgs.coreutils
+
       pkgs.alacritty
       pkgs.eww-wrapped
     ]; 
@@ -71,7 +80,7 @@
     [
       "PATH"
       ":"
-      "${pkgs.lib.makeBinPath envPackages}"
+      "${lib.makeBinPath envPackages}"
     ]
   ]);
 }
