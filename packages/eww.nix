@@ -63,10 +63,16 @@ in
       :stacking "bg"
       :exclusive "false"
       :focusable "none"
-        (button
-          :onclick "alacritty -e 'nmtui' &"
+        (overlay
+          (button
+            :onclick "alacritty -e 'nmtui' &"
+              )
+          (transform
+            :scale-x { ${button_size} }
+            :scale-y { ${button_size} }
             (image
-              :path "${../assets/etch-a-sketch.svg}")))
+              :image-width { 500 }
+              :path "${../assets/etch-a-sketch.svg}"))))
 
     (defwindow files [screen_width screen_height scale]
       :monitor 0
@@ -175,7 +181,7 @@ in
     button {
       background-color: #ddddff;
       color: black;
-      border: 0.2mm solid black;
+      border: 1mm solid black;
     }
   '';
 }
