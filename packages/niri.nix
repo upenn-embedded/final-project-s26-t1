@@ -1,3 +1,5 @@
+# Nix Settings Format: https://birdeehub.github.io/nix-wrapper-modules/wrapperModules/niri.html
+# Niri Config Wiki: https://github.com/niri-wm/niri/wiki/Getting-Started
 {pkgs, ...}:
 {
   settings = {
