@@ -19,4 +19,15 @@
       )
     )
   '';
+
+  style = ''
+    * {
+      all: unset;
+    }
+
+    button {
+      background-color: #ddddff;
+      color: black;
+    }
+  '';
 }
