@@ -12,7 +12,8 @@ let
   col2_left = "(${left} + ${button_size} + ${button_gap})";
   col3_left = "(${left} + ${button_size} * 2 + ${button_gap} * 2)";
   col4_left = "(${left} + ${button_size} * 3 + ${button_gap} * 3)";
-  title_top = "(${top} + (${unit} / 4 - ${unit} / 5) / 2)";
+  title_height = "(${unit}/5)";
+  title_top = "(${top} + (${row1_top} - ${top} - ${title_height})/2)";
 in
 {
   yuck = ''
@@ -46,7 +47,7 @@ in
         :x { ${left} }
         :y { ${title_top} }
         :width { ${unit} }
-        :height { ${unit} / 5 })
+        :height { ${title_height} })
       :stacking "bg"
       :exclusive "false"
       :focusable "none"
