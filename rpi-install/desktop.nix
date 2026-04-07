@@ -7,8 +7,4 @@
   environment.loginShellInit = ''
     [[ "$(tty)" == /dev/tty1 ]] && niri
   '';
-
-  environment.systemPackages = [
-    pkgs.alacritty # terminal
-  ];
 }

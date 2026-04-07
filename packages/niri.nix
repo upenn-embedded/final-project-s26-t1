@@ -56,5 +56,10 @@
       ":"
       "${pkgs.yaru-theme}/share/icons"
     ]
+    [
+      "PATH"
+      ":"
+      "${pkgs.alacritty}"
+    ]
   ];
 }
