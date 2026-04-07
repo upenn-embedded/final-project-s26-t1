@@ -13,7 +13,7 @@ jobs:
     - uses: cachix/install-nix-action@v31
       with:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix build .#packages.aarch64-linux.rpi4B-iso
+    - run: nix build .#packages.aarch64-linux.rpi4B-img
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "result/sd-image/*"

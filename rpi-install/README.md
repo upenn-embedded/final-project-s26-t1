@@ -7,7 +7,7 @@ Use NixOS to create a reproducible image
 1. Clone this repository: `git clone https://github.com/upenn-embedded/final-project-s26-t1.git`
 2. cd into the repository: `cd final-project-s26-t1`
 3. ensure you have [nix](https://nixos.org/download/) installed
-4. build the image: `nix build .#packages.aarch64-linux.rpi4B-iso` (you may have to enable cross-compiling for `aarch64-linux` - I'm on NixOS with cross compilation enabled in my system config, so it just works for me)
+4. build the image: `nix build .#packages.aarch64-linux.rpi4B-img` (you may have to enable cross-compiling for `aarch64-linux` - I'm on NixOS with cross compilation enabled in my system config, so it just works for me)
 5. plug-in the SD card into your system
 6. Figure out which `disk` you need to flash (BE CAREFUL): `lsblk`
 ```

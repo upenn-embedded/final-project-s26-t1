@@ -44,7 +44,7 @@
         });
       }))
       {
-        aarch64-linux.rpi4B-iso = self.nixosConfigurations.etch-a-sketch.config.system.build.sdImage;
+        aarch64-linux.rpi4B-img = self.nixosConfigurations.etch-a-sketch.config.system.build.sdImage;
       };
 
     overlays.default = final: prev: {
