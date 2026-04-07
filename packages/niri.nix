@@ -49,7 +49,14 @@
     };
   };
 
-  prefixVar = [
+  prefixVar =
+  let
+    # Programs that must be available to Niri environment
+    envPackages = [
+      pkgs.alacritty
+    ]; 
+  in
+  ([
     # Make cursor theme discoverable
     [
       "XCURSOR_PATH"
@@ -59,7 +66,7 @@
     [
       "PATH"
       ":"
-      "${pkgs.alacritty}"
+      "${pkgs.lib.makeBinPath envPackages}"
     ]
-  ];
+  ]);
 }
