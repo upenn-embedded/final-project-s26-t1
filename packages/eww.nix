@@ -179,7 +179,6 @@ in
     }
 
     button {
-      background-color: #ddddff;
       color: black;
       border: 1mm solid black;
     }
