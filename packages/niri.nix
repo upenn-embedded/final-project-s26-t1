@@ -38,6 +38,9 @@ in
       "Mod+H" = {
         "show-hotkey-overlay" = [];
       };
+      "Mod+K" = {
+        spawn-sh = "pkill -x wvkbd-mobintl || wvkbd-mobintl";
+      };
     };
 
     layout = {
@@ -65,9 +68,11 @@ in
       pkgs.wlr-randr
       pkgs.gawk
       pkgs.coreutils
+      pkgs.procps
 
       pkgs.alacritty
       pkgs.eww-wrapped
+      pkgs.wvkbd
     ]; 
   in
   ([

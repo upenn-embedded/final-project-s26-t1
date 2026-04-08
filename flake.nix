@@ -8,6 +8,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-hardware.url = "github:nixos/nixos-hardware/master";
+    # virtual keyboard support in niri is temporarily removed upstream https://github.com/niri-wm/niri/issues/403#issuecomment-4129099807
+    niri = {
+      url = "github:niri-wm/niri?rev=74d14be01f606ff519f1c4433715785c00aa0caa";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # wvkbd in stable does not work
+    nixpkgs-unstable.url = "github:nixos/nixpkgs?ref=nixos-unstable";
   };
 
   outputs = { self, nixpkgs, wrappers, ... }@inputs:
@@ -57,9 +64,11 @@
         aarch64-linux.rpi4B-img = self.nixosConfigurations.etch-a-sketch.config.system.build.sdImage;
       };
 
-    overlays.default = final: prev: {
-      niri-wrapped = self.packages.${prev.stdenv.hostPlatform.system}.niri-wrapped;
-      eww-wrapped = self.packages.${prev.stdenv.hostPlatform.system}.eww-wrapped;
+    overlays.default = final: prev: let system = prev.stdenv.hostPlatform.system; in {
+      niri-wrapped = self.packages.${system}.niri-wrapped;
+      eww-wrapped = self.packages.${system}.eww-wrapped;
+      niri = inputs.niri.packages.${system}.default;
+      wvkbd = inputs.nixpkgs-unstable.legacyPackages.${system}.wvkbd;
     };
   };
 }
