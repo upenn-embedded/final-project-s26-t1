@@ -1,4 +1,4 @@
-{pkgs, lib, ...}:
+{...}:
 let
   margins = 0.05;
   unit = "(min(screen_width, screen_height)*(1 - ${toString margins} * 2) / scale)";
@@ -173,7 +173,7 @@ in
             "credits"))
   '';
 
-  style = ''
+  style.content = ''
     * {
       all: unset;
     }
