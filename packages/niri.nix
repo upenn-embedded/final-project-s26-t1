@@ -57,7 +57,7 @@ in
     };
 
     spawn-sh-at-startup = [
-      "eww open-many draw files time help storage sync wifi credits --arg screen_width=$(${getWidthBash}) --arg screen_height=$(${getHeightBash}) --arg scale=$(${getScale}) --restart"
+      "pkill -x eww; eww daemon && eww open-many draw files time help storage sync wifi credits --arg screen_width=$(${getWidthBash}) --arg screen_height=$(${getHeightBash}) --arg scale=$(${getScale})"
     ];
   };
 
