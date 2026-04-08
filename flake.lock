@@ -46,16 +46,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1775611512,
-        "narHash": "sha256-p9nFufqfMy1MQ11q04w1i2BMOAyNhnVMZi47qk+V7zQ=",
-        "owner": "clay53",
+        "lastModified": 1775624755,
+        "narHash": "sha256-94xZxLryQqJnWcjI6WKDONMv/I9jav90MmNoCeqot0Y=",
+        "owner": "BirdeeHub",
         "repo": "nix-wrapper-modules",
-        "rev": "410dab6b13496f24df9bee929279ecabd1d5197e",
+        "rev": "f50065f6d6e733765a8afb8452c7d42bd3a7e4b9",
         "type": "github"
       },
       "original": {
-        "owner": "clay53",
-        "ref": "eww-init",
+        "owner": "BirdeeHub",
+        "ref": "main",
         "repo": "nix-wrapper-modules",
         "type": "github"
       }

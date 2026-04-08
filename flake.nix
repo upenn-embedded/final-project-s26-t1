@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     wrappers = {
-      url = "github:clay53/nix-wrapper-modules/eww-init"; # https://github.com/BirdeeHub/nix-wrapper-modules/pull/420
+      url = "github:BirdeeHub/nix-wrapper-modules/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-hardware.url = "github:nixos/nixos-hardware/master";
