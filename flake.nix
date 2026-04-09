@@ -8,6 +8,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-hardware.url = "github:nixos/nixos-hardware/master";
+    rust-overlay.url = "github:oxalica/rust-overlay";
     # virtual keyboard support in niri is temporarily removed upstream https://github.com/niri-wm/niri/issues/403#issuecomment-4129099807
     niri = {
       url = "github:niri-wm/niri?rev=74d14be01f606ff519f1c4433715785c00aa0caa";
@@ -23,13 +24,18 @@
       "x86_64-linux"
       "aarch64-linux"
     ];
+    get-rust-bin = pkgs: pkgs.rust-bin.stable.latest.default;
   in
   {
     devShells = forAllSystems (system: {
-      default = let pkgs = import nixpkgs { inherit system; }; in pkgs.mkShell {
+      default = let pkgs = import nixpkgs {
+        inherit system;
+        overlays = [(import inputs.rust-overlay)];
+      }; in pkgs.mkShell {
         buildInputs = [
           pkgs.jekyll
           pkgs.bundler
+          (get-rust-bin pkgs)
         ];
       };
     });
