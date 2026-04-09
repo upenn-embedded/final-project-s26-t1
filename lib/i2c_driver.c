@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <avr/interrupt.h>
+#include <stdbool.h>
 #include "i2c_driver.h"
 
 volatile uint8_t status = I2C_STATUS_UNKNOWN;
