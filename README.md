@@ -132,11 +132,20 @@ The device is battery powered, so it’s sufficient to just have some table spac
 * USB HID with keyboard and mouse (previously was just keyboard) on AVR64DU32
 * Determined we can use Wake Up event on LSM6DSO IMU for shake detection
 * Designed draft enclosure in SolidWorks
+* Got display on Raspberry Pi working
+* Wrapped Niri config for display server testing on Raspberry Pi and normal system
+* PR to get [eww](https://github.com/BirdeeHub/nix-wrapper-modules/pull/420) wrapper module
+* Wrote plan for Raspberry Pi dash
+* Wrote, wrapped, and lightly styled eww config for vendor-like dashboard on Raspberry Pi
+* Got virtual keyboard working on Raspberry Pi config
+* Got custom drawing program working
+* Got custom drawing program partially building for Raspberry Pi
 
 ### Current state of project
 * Working mouse and keyboard output from AVR64DU32
 * Working communication over I2C with IMU
 * 3D model of enclosure
+* Raspberry Pi configuration working
 
 ### Next week's plan
 * Set up rotary encoders to control mouse
