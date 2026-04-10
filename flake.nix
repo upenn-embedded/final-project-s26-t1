@@ -75,6 +75,16 @@
           };
           imports = [ ./packages/eww.nix ];
         });
+        etch = (import nixpkgs {
+          inherit system;
+          overlays = [
+            self.overlays.default
+            (import inputs.rust-overlay)
+            (final: _: {
+              my-rust = get-rust-bin final;
+            })
+          ];
+        }).callPackage ./etch/default.nix {};
       }))
       {
         aarch64-linux.rpi4B-img = self.nixosConfigurations.etch-a-sketch.config.system.build.sdImage;
