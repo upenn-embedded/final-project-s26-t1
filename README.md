@@ -107,53 +107,60 @@ The device is battery powered, so it’s sufficient to just have some table spac
 ## Sprint Review #1
 
 ### Last week's progress
-* Ordered parts from Mouser and Amazon as well as the eInk display from Crowd Supply.
-* Wrote code for and successfully tested a simple etch-a-sketch using Lab 4 parts. We don't plan on using the Lab 4 display due to its small size or the joystick for it, but this gives us a starting point while we wait for parts to arrive.
-* Set up AVR64DU32 in MPLAB X IDE. We have tested USB HID functionality using Microchip's demo.
-* Wrote a simple program using Microchip Code Configurator for the AVR64DU32 to test I2C communication with the IMU.
-* Acquired a Raspberry Pi 4B with 6" touchscreen display from Detkin staff.
-* Set up reproducible RPI image using NixOS. It boots but the screen doesn't work yet.
+
+- Ordered parts from Mouser and Amazon as well as the eInk display from Crowd Supply.
+- Wrote code for and successfully tested a simple etch-a-sketch using Lab 4 parts. We don't plan on using the Lab 4 display due to its small size or the joystick for it, but this gives us a starting point while we wait for parts to arrive.
+- Set up AVR64DU32 in MPLAB X IDE. We have tested USB HID functionality using Microchip's demo.
+- Wrote a simple program using Microchip Code Configurator for the AVR64DU32 to test I2C communication with the IMU.
+- Acquired a Raspberry Pi 4B with 6" touchscreen display from Detkin staff.
+- Set up reproducible RPI image using NixOS. It boots but the screen doesn't work yet.
 
 ### Current state of project
-* Etch-a-sketch proof of concept using Lab 4 joystick and display
-* Working USB HID and I2C on the AVR64DU32 Curiousity Nano
-* RPI for driving display is working but only insofar as it boots
+
+- Etch-a-sketch proof of concept using Lab 4 joystick and display
+- Working USB HID and I2C on the AVR64DU32 Curiousity Nano
+- RPI for driving display is working but only insofar as it boots
 
 ### Next week's plan
-* Port proof of concept from ATMega328PB to AVR64DU32
-* Add shake detection using IMU with AVR64DU32
-* Get RPI image working with display
-* Replace joystick with rotary encoder dials (assuming they arrive before the end of the week)
+
+- Port proof of concept from ATMega328PB to AVR64DU32
+- Add shake detection using IMU with AVR64DU32
+- Get RPI image working with display
+- Replace joystick with rotary encoder dials (assuming they arrive before the end of the week)
 
 ## Sprint Review #2
 
 ### Last week's progress
-* Wrote I2C driver (instead of using MCC generated one) with non-blocking read/write transactions
-* USB HID with keyboard and mouse (previously was just keyboard) on AVR64DU32
-* Determined we can use Wake Up event on LSM6DSO IMU for shake detection
-* Designed draft enclosure in SolidWorks
-* Got display on Raspberry Pi working
-* Wrapped Niri config for display server testing on Raspberry Pi and normal system
-* PR to get [eww](https://github.com/BirdeeHub/nix-wrapper-modules/pull/420) wrapper module
-* Wrote plan for Raspberry Pi dash
-* Wrote, wrapped, and lightly styled eww config for vendor-like dashboard on Raspberry Pi
-* Got virtual keyboard working on Raspberry Pi config
-* Got custom drawing program working
-* Got custom drawing program partially building for Raspberry Pi
+
+- Wrote I2C driver (instead of using MCC generated one) with non-blocking read/write transactions
+- USB HID with keyboard and mouse (previously was just keyboard) on AVR64DU32
+- Determined we can use Wake Up event on LSM6DSO IMU for shake detection
+- Designed draft enclosure in SolidWorks
+- Got display on Raspberry Pi working
+- Wrapped Niri config for display server testing on Raspberry Pi and normal system
+- PR to get [eww](https://github.com/BirdeeHub/nix-wrapper-modules/pull/420) wrapper module
+- Wrote plan for Raspberry Pi dash
+- Wrote, wrapped, and lightly styled eww config for vendor-like dashboard on Raspberry Pi
+- Got virtual keyboard working on Raspberry Pi config
+- Got custom drawing program working
+- Got custom drawing program partially building for Raspberry Pi
 
 images & videos: [https://github.com/upenn-embedded/final-project-s26-t1/tree/main/sprint2-media](https://github.com/upenn-embedded/final-project-s26-t1/tree/main/sprint2-media)
 
 ### Current state of project
-* Working mouse and keyboard output from AVR64DU32
-* Working communication over I2C with IMU
-* 3D model of enclosure
-* Raspberry Pi configuration working
+
+- Working mouse and keyboard output from AVR64DU32
+- Working communication over I2C with IMU
+- 3D model of enclosure
+- Raspberry Pi configuration working
 
 ### Next week's plan
-* Set up rotary encoders to control mouse
-* Configure wake up event for IMU and integrate it with USB code
-* Test full setup over USB with RPI
-* Print enclosure before MVP
+
+- Set up rotary encoders to control mouse
+- Configure wake up event for IMU and integrate it with USB code
+- Test full setup over USB with RPI
+- Print enclosure before MVP
+- Finish dashboard on RPI and make buttons work
 
 ## MVP Demo
 
