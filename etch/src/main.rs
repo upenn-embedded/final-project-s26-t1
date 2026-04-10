@@ -1,4 +1,4 @@
-use eframe::egui::{self, Color32, ColorImage};
+use eframe::egui::{self, Color32, ColorImage, Pos2};
 
 fn main() -> eframe::Result {
     let native_options = eframe::NativeOptions {
@@ -17,20 +17,22 @@ struct App {
     frame_counter: usize,
     image: Option<ColorImage>,
     texture: Option<egui::TextureHandle>,
+    last_cursor_pos: Option<Pos2>,
 }
 
 impl App {
-    fn new(cc: &eframe::CreationContext) -> Self {
+    fn new(_cc: &eframe::CreationContext) -> Self {
         Self {
             image: None,
             frame_counter: 0,
             texture: None,
+            last_cursor_pos: None,
         }
     }
 }
 
 impl eframe::App for App {
-    fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         if self.texture.is_none() {
             // TODO: find a less dumb way to do this
             if self.frame_counter < 4 { // wait until monitor size propagates
@@ -49,13 +51,72 @@ impl eframe::App for App {
             }
         }
 
+        let image = self.image.as_mut().expect("image should be here");
+
         let texture_handle = self.texture.get_or_insert_with(|| {
             ui.ctx().load_texture(
                 "my-image",
-                self.image.clone().expect("image should be here"),
+                image.clone(),
                 Default::default()
             )
         });
+
+        if let Some(cursor_pos) = ui.input(|i| i.pointer.hover_pos()) {
+            // discard if not in screen
+            if
+                cursor_pos.x >= 0.0
+                && cursor_pos.x <= image.width() as f32
+                && cursor_pos.y >= 0.0
+                && cursor_pos.y <= image.height() as f32
+            {
+                if let Some(last_cursor_pos) = self.last_cursor_pos.as_mut() {
+                    let buffer = 4;
+                    let rect_x1: usize = usize::saturating_sub(
+                        last_cursor_pos.x.min(cursor_pos.x) as usize,
+                        buffer
+                    );
+                    let rect_x2: usize = usize::min(
+                        image.width()-1,
+                        last_cursor_pos.x.max(cursor_pos.x) as usize + buffer,
+                    );
+                    let rect_y1: usize = usize::saturating_sub(
+                        last_cursor_pos.y.min(cursor_pos.y) as usize,
+                        buffer
+                    );
+                    let rect_y2: usize = usize::min(
+                        image.height()-1,
+                        last_cursor_pos.y.max(cursor_pos.y) as usize + buffer,
+                    );
+
+                    for x in rect_x1..=rect_x2 {
+                        let xf = x as f32;
+                        for y in rect_y1..=rect_y2 {
+                            let yf = y as f32;
+                            let dist_from_line =
+                                (
+                                    (cursor_pos.y-last_cursor_pos.y)*xf
+                                    -(cursor_pos.x-last_cursor_pos.x)*yf
+                                    +cursor_pos.x*last_cursor_pos.y
+                                    -cursor_pos.y*last_cursor_pos.x
+                                ).abs()
+                                /(
+                                    (cursor_pos.y-last_cursor_pos.y)*(cursor_pos.y-last_cursor_pos.y)
+                                    +(cursor_pos.x-last_cursor_pos.x)*(cursor_pos.x-last_cursor_pos.x)
+                                ).sqrt();
+                            if dist_from_line < 1.0 {
+                                let index = image.width()*y+x;
+                                image.pixels[index] = Color32::BLACK;
+                            }
+                        }
+                    }
+
+                    *last_cursor_pos = cursor_pos;
+                    texture_handle.set(image.clone(), Default::default());
+                } else {
+                    self.last_cursor_pos = Some(cursor_pos);
+                }
+            }
+        }
 
         ui.image(egui::load::SizedTexture::from_handle(texture_handle));
     }
