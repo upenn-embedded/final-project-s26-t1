@@ -28,15 +28,25 @@
   in
   {
     devShells = forAllSystems (system: {
-      default = let pkgs = import nixpkgs {
-        inherit system;
-        overlays = [(import inputs.rust-overlay)];
-      }; in pkgs.mkShell {
+      default =
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [(import inputs.rust-overlay)];
+        };
+        ld_libraries = [
+          pkgs.wayland
+          pkgs.libxkbcommon
+          pkgs.vulkan-loader
+        ];
+      in pkgs.mkShell {
         buildInputs = [
           pkgs.jekyll
           pkgs.bundler
           (get-rust-bin pkgs)
         ];
+
+        LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath ld_libraries}:$LD_LIBRARY_PATH";
       };
     });
 
