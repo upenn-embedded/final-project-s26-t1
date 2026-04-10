@@ -128,10 +128,21 @@ The device is battery powered, so it’s sufficient to just have some table spac
 ## Sprint Review #2
 
 ### Last week's progress
+* Wrote I2C driver (instead of using MCC generated one) with non-blocking read/write transactions
+* USB HID with keyboard and mouse (previously was just keyboard) on AVR64DU32
+* Determined we can use Wake Up event on LSM6DSO IMU for shake detection
+* Designed draft enclosure in SolidWorks
 
 ### Current state of project
+* Working mouse and keyboard output from AVR64DU32
+* Working communication over I2C with IMU
+* 3D model of enclosure
 
 ### Next week's plan
+* Set up rotary encoders to control mouse
+* Configure wake up event for IMU and integrate it with USB code
+* Test full setup over USB with RPI
+* Print enclosure before MVP
 
 ## MVP Demo
 
