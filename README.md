@@ -141,6 +141,8 @@ The device is battery powered, so it’s sufficient to just have some table spac
 * Got custom drawing program working
 * Got custom drawing program partially building for Raspberry Pi
 
+images & videos: [https://github.com/upenn-embedded/final-project-s26-t1/tree/main/sprint2-media](https://github.com/upenn-embedded/final-project-s26-t1/tree/main/sprint2-media)
+
 ### Current state of project
 * Working mouse and keyboard output from AVR64DU32
 * Working communication over I2C with IMU
