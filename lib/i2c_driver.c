@@ -5,6 +5,26 @@
 
 volatile uint8_t status = I2C_STATUS_UNKNOWN;
 
+volatile I2CCommand* curr_cmd = NULL;
+
+const I2CCommand I2C_WRITE_CMD = {
+    .stage = CMD_STAGE_ADDR,
+    .device_address = 0,
+    .rw_mode = 0,
+    .reg = 0,
+    .tx_data = 0,
+    .rx_data = 0
+};
+
+const I2CCommand I2C_READ_CMD = {
+    .stage = CMD_STAGE_ADDR,
+    .device_address = 0,
+    .rw_mode = 1,
+    .reg = 0,
+    .tx_data = 0,
+    .rx_data = 0
+};
+
 void InitializeTWI0() {
     status = I2C_STATUS_UNKNOWN;
     cli();
@@ -116,11 +136,40 @@ int TWI0_ReadFull(uint8_t addr, uint8_t reg, uint8_t* data) {
     return (status == I2C_STATUS_READY) ? 0 : -1;
 }
 
+bool TWI0_IsBusy() {
+    return curr_cmd != NULL && curr_cmd->stage != CMD_STAGE_ERROR &&
+            curr_cmd->stage != CMD_STAGE_DONE;
+}
+
+int TWI0_ReadAsync(I2CCommand* cmd) {
+    if (TWI0_IsBusy() || cmd == NULL) {
+        return -1;
+    }
+    curr_cmd = cmd;
+    
+    TWI0_SendAddr(cmd->device_address, 0); // Reads always start as writes
+    return 0;
+}
+
+int TWI0_WriteAsync(I2CCommand* cmd) {
+    if (TWI0_IsBusy() || cmd == NULL) {
+        return -1;
+    }
+    curr_cmd = cmd;
+    
+    TWI0_SendAddr(cmd->device_address, 0);
+    return 0;
+}
+
 ISR(TWI0_TWIM_vect) {
     // check for errors (NACK received, bus error)
     if (TWI0.MSTATUS & (TWI_RXACK_bm | TWI_BUSERR_bm | TWI_ARBLOST_bm)) {
         status = I2C_STATUS_ERROR;
         TWI0_Stop();
+        if (curr_cmd != NULL) {
+            curr_cmd->stage = CMD_STAGE_ERROR;
+            curr_cmd = NULL;
+        }
         return;
     }
     
@@ -128,13 +177,48 @@ ISR(TWI0_TWIM_vect) {
     if (TWI0.MSTATUS & TWI_WIF_bm) {
         if (status == I2C_STATUS_ADDRESSING) {
             status = I2C_STATUS_ASUCCESS;
+            if (curr_cmd != NULL) {
+                if (curr_cmd->stage == CMD_STAGE_ADDR) {
+                    curr_cmd->stage = CMD_STAGE_REG;
+                    TWI0_Write(curr_cmd->reg);
+                } else if (curr_cmd->stage == CMD_STAGE_REP) {
+                    curr_cmd->stage = CMD_STAGE_DATA;
+                } else { // Unknown state
+                    curr_cmd->stage = CMD_STAGE_ERROR;
+                }
+            }
         } else if (status == I2C_STATUS_WRITING) {
             status = I2C_STATUS_WSUCCESS;
+            if (curr_cmd != NULL) {
+                if (curr_cmd->stage == CMD_STAGE_REG && curr_cmd->rw_mode == 0) {
+                    curr_cmd->stage = CMD_STAGE_DATA;
+                    TWI0_Write(curr_cmd->tx_data);
+                } else if (curr_cmd->stage == CMD_STAGE_REG && curr_cmd->rw_mode == 1) {
+                    curr_cmd->stage = CMD_STAGE_REP;
+                    TWI0_SendAddr(curr_cmd->device_address, 1);
+                } else if (curr_cmd->stage == CMD_STAGE_DATA && curr_cmd->rw_mode == 0) {
+                    TWI0_Stop();
+                    curr_cmd->stage = CMD_STAGE_DONE;
+                    curr_cmd = NULL;
+                } else { // Unknown state
+                    curr_cmd->stage = CMD_STAGE_ERROR;
+                }
+            }
         }
     }
     
     // read interrupt
     if (TWI0.MSTATUS & TWI_RIF_bm) {
         status = I2C_STATUS_RREADY;
+        if (curr_cmd != NULL) {
+            if ((curr_cmd->stage == CMD_STAGE_REP || 
+                    curr_cmd->stage == CMD_STAGE_DATA) &&
+                    curr_cmd->rw_mode == 1) {
+                curr_cmd->rx_data = TWI0_Read(true);
+                TWI0_Stop();
+                curr_cmd->stage = CMD_STAGE_DONE;
+                curr_cmd = NULL;
+            }
+        }
     }
 }

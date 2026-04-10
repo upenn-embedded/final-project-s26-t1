@@ -13,15 +13,20 @@ int main(void) {
     
     InitializeTWI0();
     
-    uint8_t data;
-    int code;
     while(1) {
+        I2CCommand read_cmd = I2C_READ_CMD;
+        read_cmd.device_address = LSM6DSO_ADDR;
+        read_cmd.reg = LSM6DSO_WHO_AM_I_REG;
+        
         printf("Starting I2C Transaction...\n");
-        code = TWI0_ReadFull(LSM6DSO_ADDR, LSM6DSO_WHO_AM_I_REG, &data);
-        if (code == 0) {
-            printf("Data Received: 0x%02X\n", data);
+        TWI0_ReadAsync(&read_cmd);
+        
+        while (TWI0_IsBusy());
+        
+        if (read_cmd.stage == CMD_STAGE_DONE) {
+            printf("Data Received: 0x%02X\n", read_cmd.rx_data);
         } else {
-            printf("I2C Error (%d), trying again...\n", code);
+            printf("I2C Error (%d), trying again...\n", read_cmd.stage);
         }
         
         _delay_ms(1000);
