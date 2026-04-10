@@ -56,8 +56,31 @@ in
       xcursor-size = 8;
     };
 
-    spawn-sh-at-startup = [
-      "pkill -x eww; eww daemon && eww open-many draw files time help storage sync wifi credits --arg screen_width=$(${getWidthBash}) --arg screen_height=$(${getHeightBash}) --arg scale=$(${getScale})"
+    spawn-sh-at-startup =
+    let
+      eww_windows = [
+        "draw"
+        "files"
+        "time"
+        "help"
+        "storage"
+        "sync"
+        "wifi"
+        "credits"
+      ];
+      eww_args = {
+        screen_width = "$(${getWidthBash})";
+        screen_height = "$(${getHeightBash})";
+        scale = "$(${getScale})";
+        cmd_alacritty = "alacritty";
+        cmd_etch = "etch";
+      };
+    in
+    [
+      "pkill -x eww; eww daemon && eww open-many ${builtins.concatStringsSep " " eww_windows} ${lib.foldlAttrs
+        (acc: arg: cmd: acc + ''--arg ${arg}=${cmd} '')
+        "" eww_args
+      }"
     ];
   };
 
@@ -71,6 +94,7 @@ in
       pkgs.procps
 
       pkgs.alacritty
+      pkgs.etch
       pkgs.eww-wrapped
       pkgs.wvkbd
     ]; 

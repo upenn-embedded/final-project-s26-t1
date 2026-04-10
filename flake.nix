@@ -92,6 +92,7 @@
 
     overlays.default = final: prev: let system = prev.stdenv.hostPlatform.system; in {
       niri-wrapped = self.packages.${system}.niri-wrapped;
+      etch = self.packages.${system}.etch;
       eww-wrapped = self.packages.${system}.eww-wrapped;
       niri = inputs.niri.packages.${system}.default;
       wvkbd = inputs.nixpkgs-unstable.legacyPackages.${system}.wvkbd;
