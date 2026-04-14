@@ -39,5 +39,6 @@ nvme0n1                                       259:0    0 931.5G  0 disk
 * **"remember" etch-a-sketch password**: `ssh-copy-id root@etch-a-sketch.local`
 * **update configuration remotely without re-flashing**
     * NixOS Machines: `nixos-rebuild switch --flake .#etch-a-sketch --target-host root@etch-a-sketch.local`
+        * It can sometimes be faster to also build on the Pi so you don't have to cross-compile: `nixos-rebuild switch --flake .#etch-a-sketch --target-host root@etch-a-sketch.local --build-host root@etch-a-sketch.local`
     * idk: https://github.com/NixOS/nixpkgs/issues/44135
 * **test desktop configuration locally** (Wayland only): `nix run .#niri-wrapped` (nicer if go to different TTY: `Ctrl+Alt+F#`)
