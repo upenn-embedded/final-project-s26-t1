@@ -9,11 +9,13 @@
 #include <util/atomic.h>
 #include "usb_driver.h"
 
+const uint8_t usb_kbd_super_k[9] = {0x01, 0x08, 0x00, 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00};
+const uint8_t usb_kbd_no_keys[9] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
 // Report buffers
-const static uint8_t kbd_press_a[9]   = {0x01, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00};
-const static uint8_t kbd_release[9] = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 static uint8_t mouse_move_buffer[4]  = {0x02, 0x00, 0x00, 0x00};
 
+volatile uint8_t mouse_buttons = 0;
 volatile int mouse_delta[2] = {0, 0}; // (dx, dy)
 volatile uint8_t* kbd_report = NULL;
 
@@ -36,18 +38,19 @@ void Initialize_USB() {
     sei();
 }
 
-int set_next_keyboard_press(bool overwrite, uint8_t* report) {
-    if (overwrite || kbd_report == NULL) {
-        kbd_report = report;
-        return 0;
-    } else {
-        return -1;
-    }
+int set_keyboard_press(uint8_t* report) {
+    kbd_report = report;
+    return 0;
 }
 
 int delta_next_mouse_move(int dx_change, int dy_change) {
     mouse_delta[0] += dx_change;
     mouse_delta[1] += dy_change;
+    return 0;
+}
+
+int set_left_click(bool pressed) {
+    mouse_buttons = (pressed) ? USB_LEFT_BTN : USB_NO_BTNS;
     return 0;
 }
 
@@ -65,8 +68,9 @@ void Process_USB_Reports() {
     }
     printf("%d | %d, %d\n", usb_status, mouse_delta[0], mouse_delta[1]);
     
-    if (usb_status == SUCCESS || 1) {
+    if (usb_status == SUCCESS) {
         if ((next_report_type == USB_TYPE_MOUSE || kbd_report == NULL) && (mouse_delta[0] != 0 || mouse_delta[1] != 0)) {
+            mouse_move_buffer[1] = mouse_buttons;
             mouse_move_buffer[2] = local_dx;
             mouse_move_buffer[3] = local_dy;
             USB_TransferWriteStart(hidPipe, mouse_move_buffer, 4, false, NULL);
@@ -74,13 +78,12 @@ void Process_USB_Reports() {
                 mouse_delta[0] -= local_dx;
                 mouse_delta[1] -= local_dy;
             }
-            next_report_type = USB_TYPE_KEYBOARD_PRESS;
-        } else if (next_report_type == USB_TYPE_KEYBOARD_PRESS && kbd_report != NULL) {
+            next_report_type = USB_TYPE_KEYBOARD;
+        } else if (next_report_type == USB_TYPE_KEYBOARD && kbd_report != NULL) {
             USB_TransferWriteStart(hidPipe, kbd_report, 9, false, NULL);
-            kbd_report = NULL;
-            next_report_type = USB_TYPE_KEYBOARD_RELEASE;
-        } else if (next_report_type == USB_TYPE_KEYBOARD_RELEASE) {
-            USB_TransferWriteStart(hidPipe, kbd_release, 9, false, NULL); // Always the same report to release key
+            next_report_type = USB_TYPE_MOUSE;
+        } else (next_report_type == USB_TYPE_KEYBOARD == kbd_report == NULL) {
+            USB_TransferWriteStart(hidPipe, usb_kbd_no_keys, 9, false, NULL);
             next_report_type = USB_TYPE_MOUSE;
         }
      }

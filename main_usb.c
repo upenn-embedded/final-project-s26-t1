@@ -5,7 +5,11 @@
 #include <util/delay.h>
 #include <stdint.h>
 
+#define LCLICK_BM PIN0_bm
+#define VIRTKBD_BM PIN1_bm
+
 void io_init(void) {
+    // Rotary encoders
     // set PA4, PA5, PA6, PA7 as inputs
     PORTA.DIRCLR = PIN4_bm | PIN5_bm | PIN6_bm | PIN7_bm;
 
@@ -14,6 +18,10 @@ void io_init(void) {
     PORTA.PIN5CTRL = PORT_PULLUPEN_bm; // encoder X - B
     PORTA.PIN6CTRL = PORT_PULLUPEN_bm; // encoder Y - A
     PORTA.PIN7CTRL = PORT_PULLUPEN_bm; // encoder Y - B
+    
+    // Buttons
+    PORTD.PIN0CTRL = PORT_PULLUPEN_bm;
+    PORTD.PIN1CTRL = PORT_PULLUPEN_bm;
 }
 
 void timer_init(void) {
@@ -80,6 +88,15 @@ int main(void) {
     
     while (1) {
         Process_USB_Reports();
+        
+        // Buttons
+        set_left_click((PORTF.IN & LCLICK_BM) == 0);
+        
+        if ((PORTF.IN & VIRTKBD_BM) == 0) {
+            set_keyboard_press(usb_kbd_super_k);
+        } else {
+            set_keyboard_press(NULL);
+        }
     }
     return 0;
 }
