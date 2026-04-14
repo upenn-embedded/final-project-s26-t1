@@ -82,7 +82,7 @@ void Process_USB_Reports() {
         } else if (next_report_type == USB_TYPE_KEYBOARD && kbd_report != NULL) {
             USB_TransferWriteStart(hidPipe, kbd_report, 9, false, NULL);
             next_report_type = USB_TYPE_MOUSE;
-        } else (next_report_type == USB_TYPE_KEYBOARD == kbd_report == NULL) {
+        } else if (next_report_type == USB_TYPE_KEYBOARD) {
             USB_TransferWriteStart(hidPipe, usb_kbd_no_keys, 9, false, NULL);
             next_report_type = USB_TYPE_MOUSE;
         }
