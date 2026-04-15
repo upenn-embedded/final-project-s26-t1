@@ -73,7 +73,8 @@ let
       ];
     }
     {
-      name = "help";
+      name = "battery";
+      image = ../assets/battery.svg;
     }
     {
       name = "storage";
@@ -96,6 +97,7 @@ let
     }
     {
       name = "sync";
+      image = ../assets/sync.svg;
     }
     {
       name = "wifi";

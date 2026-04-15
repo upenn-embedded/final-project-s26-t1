@@ -62,7 +62,7 @@ in
         "draw"
         "files"
         "time"
-        "help"
+        "battery"
         "storage"
         "sync"
         "wifi"
