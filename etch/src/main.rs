@@ -11,6 +11,7 @@ fn main() -> eframe::Result {
         wgpu::DeviceDescriptor {
             label: Some("egui wgpu device"),
             required_limits: wgpu::Limits {
+                max_texture_dimension_2d: 3840, // slightly larger for laptop display
                 ..base_limits
             },
             ..Default::default()
@@ -57,7 +58,7 @@ impl eframe::App for App {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         if self.texture.is_none() {
             // TODO: find a less dumb way to do this
-            if self.frame_counter < 4 { // wait until monitor size propagates
+            if self.frame_counter < 3 { // wait until monitor size propagates
                 self.frame_counter += 1;
                 // make sure monitor scaling factor is ignored
                 ui.ctx().set_pixels_per_point(1.0);
