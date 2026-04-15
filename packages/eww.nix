@@ -86,11 +86,11 @@ let
                 :scale-x { ${inner_button_size} }
                 :scale-y { ${inner_button_size} }
                   (circular-progress
-                    :value 50
-                    :start-at 0
-                    :thickness 10
+                    :value { EWW_DISK["/"].used_perc }
+                    :start-at 40
+                    :thickness { ${border_size}*4 }
                     :clockwise true
-                    :style "color: blue; background-color: red;")))
+                    :style "color: black; background-color: #dddddd;")))
         ''
       ];
     }
