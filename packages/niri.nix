@@ -66,13 +66,14 @@ in
         "storage"
         "sync"
         "wifi"
-        "credits"
+        "browser"
       ];
       eww_args = {
         screen_width = "$(${getWidthBash})";
         screen_height = "$(${getHeightBash})";
         scale = "$(${getScale})";
         cmd_alacritty = "alacritty";
+        cmd_browser = "firefox";
         cmd_etch = "etch";
         cmd_files = "pcmanfm-qt";
       };
@@ -97,6 +98,7 @@ in
       pkgs.alacritty
       pkgs.etch
       pkgs.eww-wrapped
+      pkgs.firefox
       pkgs.pcmanfm-qt
       pkgs.wvkbd
     ]; 

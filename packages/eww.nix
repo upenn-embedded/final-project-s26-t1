@@ -25,6 +25,7 @@ let
         screen_height
         scale
         cmd_alacritty
+        cmd_browser
         cmd_etch
         cmd_files
       ]
@@ -105,7 +106,9 @@ let
       image = ../assets/wifi.svg;
     }
     {
-      name = "credits";
+      name = "browser";
+      command = "\${cmd_browser} https://garticphone.com &";
+      image = ../assets/earth.svg;
     }
   ];
 in
