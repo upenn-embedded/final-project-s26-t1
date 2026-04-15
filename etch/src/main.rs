@@ -102,7 +102,7 @@ impl eframe::App for App {
                     // prevent jumps on start
                     && !(self.blank && dxy2 > 10.0)
                 {
-                    let buffer = 4;
+                    let buffer = 1;
                     let rect_x1: usize = usize::saturating_sub(
                         last_cursor_pos.x.min(cursor_pos.x) as usize,
                         buffer
