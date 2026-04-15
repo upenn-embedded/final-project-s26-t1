@@ -6,7 +6,9 @@ let
   left = "((screen_width/scale - ${unit})/2)";
   button_gap = "(${unit} * 0.01)";
   button_size = "((${unit} - ${button_gap} * 3)/4)";
-  inner_button_size = button_size;
+  svg_proportional_line_thickness = 0.2 / 10;
+  border_size = "(${button_size}*${builtins.toString svg_proportional_line_thickness})";
+  inner_button_size = "(${button_size} - ${border_size}*2)";
   buttons_height = "(${button_size} * 2 + ${button_gap})";
   row1_top = "(${top} + (${unit} - ${buttons_height}) / 2)";
   row2_top = "(${row1_top} + ${button_size} + ${button_gap})";
@@ -57,12 +59,16 @@ let
     {
       name = "time";
       overlays = [
-        ''(transform
-          :scale-x { ${inner_button_size} }
-          :scale-y { ${inner_button_size} }
-            (image
-              :image-width 500
-              :path "${../assets/clock.svg}"))
+        ''
+          (transform
+            :translate-x { ${border_size} }
+            :translate-y { ${border_size} }
+              (transform
+                :scale-x { ${inner_button_size} }
+                :scale-y { ${inner_button_size} }
+                  (image
+                    :image-width 500
+                    :path "${../assets/clock.svg}")))
         ''
       ];
     }
@@ -71,6 +77,22 @@ let
     }
     {
       name = "storage";
+      overlays = [
+        ''
+          (transform
+            :translate-x { ${border_size} }
+            :translate-y { ${border_size} }
+              (transform
+                :scale-x { ${inner_button_size} }
+                :scale-y { ${inner_button_size} }
+                  (circular-progress
+                    :value 50
+                    :start-at 0
+                    :thickness 10
+                    :clockwise true
+                    :style "color: blue; background-color: red;")))
+        ''
+      ];
     }
     {
       name = "sync";
@@ -120,11 +142,14 @@ in
       (let
         overlays = (if elem ? image then [''
           (transform
-            :scale-x { ${inner_button_size} }
-            :scale-y { ${inner_button_size} }
-            (image
-              :image-width { 500 }
-              :path "${elem.image}"))
+            :translate-x { ${border_size} }
+            :translate-y { ${border_size} }
+              (transform
+                :scale-x { ${inner_button_size} }
+                :scale-y { ${inner_button_size} }
+                (image
+                  :image-width { 500 }
+                  :path "${elem.image}")))
         ''] else [])
         ++ (elem.overlays or []);
       in
@@ -142,6 +167,7 @@ in
           (overlay
             (button
               ${if elem ? command then '':onclick "${elem.command}"'' else ""}
+              :style "color: black; border: ''${${border_size}}px solid black;";
                 ${if builtins.length overlays > 0 then "" else ''"${elem.name}"''})
             ${builtins.concatStringsSep " " overlays})
         '';
@@ -152,11 +178,6 @@ in
   style.content = ''
     * {
       all: unset;
-    }
-
-    button {
-      color: black;
-      border: 1mm solid black;
     }
   '';
 }
