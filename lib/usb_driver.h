@@ -29,6 +29,7 @@ extern "C" {
 extern uint8_t usb_kbd_super_k[9];
 extern uint8_t usb_kbd_no_keys[9];
 extern uint8_t usb_kbd_letter_k[9];
+extern uint8_t usb_kbd_ctrl_z[9];
 
 void Initialize_USB(void);
 

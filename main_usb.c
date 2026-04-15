@@ -3,6 +3,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include "lib/lsm6dso_driver.h"
 #include <stdint.h>
 
 #define LCLICK_BM PIN0_bm
@@ -80,6 +81,9 @@ int main(void) {
     // Initialize USB
     Initialize_USB();
     
+    // Initialize IMU
+    Initialize_IMU();
+    
     // Initialize I/O and timer for rotary encoders
     io_init();
     timer_init();
@@ -96,7 +100,12 @@ int main(void) {
             PORTF.OUTTGL = PIN2_bm;
         }
         
-        if ((PORTD.IN & VIRTKBD_BM) == 0) {
+        if (detect_shake_event()) {
+            PORTF.OUTTGL = PIN2_bm;
+            set_keyboard_press(usb_kbd_ctrl_z);
+            _delay_ms(50); // simulate 50ms keyboard press
+        } else 
+            if ((PORTD.IN & VIRTKBD_BM) == 0) {
             PORTF.OUTTGL = PIN2_bm;
             set_keyboard_press(usb_kbd_super_k);
         } else {
