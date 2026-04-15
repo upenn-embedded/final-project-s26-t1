@@ -41,6 +41,7 @@ struct App {
     image: Option<ColorImage>,
     texture: Option<egui::TextureHandle>,
     last_cursor_pos: Option<Pos2>,
+    blank: bool,
 }
 
 impl App {
@@ -50,6 +51,7 @@ impl App {
             frame_counter: 0,
             texture: None,
             last_cursor_pos: None,
+            blank: true,
         }
     }
 }
@@ -92,7 +94,17 @@ impl eframe::App for App {
                 && cursor_pos.y >= 0.0
                 && cursor_pos.y <= image.height() as f32
             {
-                if let Some(last_cursor_pos) = self.last_cursor_pos.as_mut() {
+                if
+                    let Some(last_cursor_pos) = self.last_cursor_pos.as_mut()
+                    // prevent jumps on start
+                    && !(
+                        self.blank
+                        && (
+                            (last_cursor_pos.x-cursor_pos.x).abs() > image.width() as f32/10.0
+                            || (last_cursor_pos.y-cursor_pos.y).abs() > image.height() as f32/10.0
+                        )
+                    )
+                {
                     let buffer = 4;
                     let rect_x1: usize = usize::saturating_sub(
                         last_cursor_pos.x.min(cursor_pos.x) as usize,
@@ -134,6 +146,7 @@ impl eframe::App for App {
                     }
 
                     *last_cursor_pos = cursor_pos;
+                    self.blank = false;
                     texture_handle.set(image.clone(), Default::default());
                 } else {
                     self.last_cursor_pos = Some(cursor_pos);
