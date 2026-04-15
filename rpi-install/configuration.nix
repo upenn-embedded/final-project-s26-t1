@@ -69,6 +69,7 @@
     fastfetch
     htop
     neovim
+    git
   ];
 
   nix.settings.experimental-features = [

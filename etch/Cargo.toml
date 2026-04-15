@@ -5,3 +5,7 @@ edition = "2024"
 
 [dependencies]
 eframe = { version = "0.34.1", features = ["wgpu"] }
+
+[patch.crates-io]
+# include fix for https://github.com/gfx-rs/wgpu/issues/9293
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "c9c7359f5b52f751077e583513efef7cd2c19806" }
