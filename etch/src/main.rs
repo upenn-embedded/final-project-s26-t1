@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use eframe::{egui::{self, Color32, ColorImage, Pos2}, egui_wgpu::{WgpuConfiguration, WgpuSetup, WgpuSetupCreateNew}, wgpu::{self, Features}};
+use eframe::{egui::{self, Color32, ColorImage, Key, Pos2}, egui_wgpu::{WgpuConfiguration, WgpuSetup, WgpuSetupCreateNew}, wgpu::{self, Features}};
 
 fn main() -> eframe::Result {
     // force limits lower for raspberry pi
@@ -148,6 +148,11 @@ impl eframe::App for App {
                     self.last_cursor_pos = Some(cursor_pos);
                 }
             }
+        }
+
+        if ui.input(|i| i.modifiers.ctrl && i.key_pressed(Key::Z)) {
+            *image = ColorImage::filled([image.width(), image.height()], Color32::WHITE);
+            texture_handle.set(image.clone(), Default::default());
         }
 
         ui.image(egui::load::SizedTexture::from_handle(texture_handle));
