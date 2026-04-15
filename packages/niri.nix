@@ -59,7 +59,7 @@ in
     spawn-sh-at-startup =
     let
       eww_windows = [
-        "title"
+        "title" # Needs to be below everything
 
         "draw"
         "files"
