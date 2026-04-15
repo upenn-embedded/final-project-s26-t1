@@ -141,6 +141,22 @@ in
       color = "red";
     }}
 
+    ${mkWindow {
+      name = "title";
+      x = left;
+      y = title_top;
+      width = unit;
+      height = title_height;
+      content = ''
+        (transform
+          :scale-x { ${unit} }
+          :scale-y { ${title_height} }
+          (image
+            :image-width { 2000 }
+            :path "${../assets/title.svg}"))
+      '';
+    }}
+
     ${(builtins.foldl' (acc: elem: {
       i = acc.i + 1;
       out = acc.out + mkWindow

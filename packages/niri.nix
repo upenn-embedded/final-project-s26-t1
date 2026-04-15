@@ -65,6 +65,7 @@ in
         "battery"
         "storage"
         "sync"
+        "title"
         "wifi"
         "browser"
       ];
