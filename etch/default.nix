@@ -29,6 +29,10 @@ rustPlatform.buildRustPackage.override {
   ];
 
   cargoLock.lockFile = ./Cargo.lock;
+  cargoLock.outputHashes = {
+    "ecolor-0.34.1" = "sha256-1T3Hwr8eBICVWm5HGQdxXtOdC6/5Wq0iPx4GPlWOSes=";
+    "naga-29.0.1" = "sha256-MlEx5KhtO/8zLYbxndbsSPmyYt2GPlPoioRne39o9Zw=";
+  };
 
   postInstall = ''
     wrapProgram "$out/bin/etch" --prefix LD_LIBRARY_PATH : "${libPath}"
