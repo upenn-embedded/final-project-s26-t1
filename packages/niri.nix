@@ -59,13 +59,14 @@ in
     spawn-sh-at-startup =
     let
       eww_windows = [
+        "title"
+
         "draw"
         "files"
         "time"
         "battery"
         "storage"
         "sync"
-        "title"
         "wifi"
         "browser"
       ];

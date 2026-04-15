@@ -188,7 +188,7 @@ in
           (overlay
             (button
               ${if elem ? command then '':onclick "${elem.command}"'' else ""}
-              :style "color: black; border: ''${${border_size}}px solid black;";
+              :style "color: black; border: ''${${border_size}}px solid black;"
                 ${if builtins.length overlays > 0 then "" else ''"${elem.name}"''})
             ${builtins.concatStringsSep " " overlays})
         '';
