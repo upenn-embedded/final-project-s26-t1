@@ -1,9 +1,32 @@
-use eframe::egui::{self, Color32, ColorImage, Pos2};
+use std::sync::Arc;
+
+use eframe::{egui::{self, Color32, ColorImage, Pos2}, egui_wgpu::{WgpuConfiguration, WgpuSetup, WgpuSetupCreateNew}, wgpu};
 
 fn main() -> eframe::Result {
+    // force limits lower for raspberry pi
+    let mut wgpu_setup_create_new = WgpuSetupCreateNew::without_display_handle();
+    wgpu_setup_create_new.device_descriptor = Arc::new(|_adapter| {
+        let base_limits = wgpu::Limits::downlevel_webgl2_defaults();
+
+        wgpu::DeviceDescriptor {
+            label: Some("egui wgpu device"),
+            required_limits: wgpu::Limits {
+                // When using a depth buffer, we have to be able to create a texture
+                // large enough for the entire surface, and we want to support 4k+ displays.
+                max_texture_dimension_2d: 8192,
+                ..base_limits
+            },
+            ..Default::default()
+        }
+    });
+
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_fullscreen(true),
+        wgpu_options: WgpuConfiguration {
+            wgpu_setup: WgpuSetup::CreateNew(wgpu_setup_create_new),
+            ..Default::default()
+        },
         ..Default::default()
     };
     eframe::run_native(
