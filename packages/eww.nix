@@ -6,6 +6,7 @@ let
   left = "((screen_width/scale - ${unit})/2)";
   button_gap = "(${unit} * 0.01)";
   button_size = "((${unit} - ${button_gap} * 3)/4)";
+  inner_button_size = button_size;
   buttons_height = "(${button_size} * 2 + ${button_gap})";
   row1_top = "(${top} + (${unit} - ${buttons_height}) / 2)";
   row2_top = "(${row1_top} + ${button_size} + ${button_gap})";
@@ -56,6 +57,15 @@ let
     {
       name = "time";
       command = "etch &";
+      overlays = [
+        ''(transform
+          :scale-x { ${inner_button_size} }
+          :scale-y { ${inner_button_size} }
+            (image
+              :image-width 500
+              :path "${../assets/clock.svg}"))
+        ''
+      ];
     }
     {
       name = "help";
@@ -111,7 +121,19 @@ in
 
     ${(builtins.foldl' (acc: elem: {
       i = acc.i + 1;
-      out = acc.out + mkWindow {
+      out = acc.out + mkWindow
+      (let
+        overlays = (if elem ? image then [''
+          (transform
+            :scale-x { ${inner_button_size} }
+            :scale-y { ${inner_button_size} }
+            (image
+              :image-width { 500 }
+              :path "${elem.image}"))
+        ''] else [])
+        ++ (elem.overlays or []);
+      in
+      {
         name = elem.name;
         x =
           if lib.trivial.mod acc.i 4 == 0 then left
@@ -121,22 +143,14 @@ in
         y = if acc.i < 4 then row1_top else row2_top;
         width = button_size;
         height = button_size;
-        content = if elem ? image then ''
+        content = ''
           (overlay
             (button
-              :onclick "${elem.command}")
-            (transform
-              :scale-x { ${button_size} }
-              :scale-y { ${button_size} }
-              (image
-                :image-width { 500 }
-                :path "${elem.image}")))
-        '' else ''
-          (button
-            :onclick "${elem.command}"
-              "${elem.name}")
+              :onclick "${elem.command}"
+                ${if builtins.length overlays > 0 then "" else ''"${elem.name}"''})
+            ${builtins.concatStringsSep " " overlays})
         '';
-      };
+      });
     }) {i = 0; out = "";} buttons).out}
   '';
 
