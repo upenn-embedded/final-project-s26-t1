@@ -26,7 +26,9 @@ extern "C" {
 #define USB_LEFT_BTN 0x01
 #define USB_NO_BTNS 0U
     
-extern const uint8_t usb_kbd_super_k[9];
+extern uint8_t usb_kbd_super_k[9];
+extern uint8_t usb_kbd_no_keys[9];
+extern uint8_t usb_kbd_letter_k[9];
 
 void Initialize_USB(void);
 

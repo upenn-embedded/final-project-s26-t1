@@ -9,15 +9,19 @@
 #include <util/atomic.h>
 #include "usb_driver.h"
 
-const uint8_t usb_kbd_super_k[9] = {0x01, 0x08, 0x00, 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00};
-const uint8_t usb_kbd_no_keys[9] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+// These *cannot* be const for weird memory reasons
+uint8_t usb_kbd_super_k[9] = {0x01, 0x08, 0x00, 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00};
+uint8_t usb_kbd_letter_k[9] = {0x01, 0x00, 0x00, 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00};
+uint8_t usb_kbd_no_keys[9] = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 // Report buffers
 static uint8_t mouse_move_buffer[4]  = {0x02, 0x00, 0x00, 0x00};
 
-volatile uint8_t mouse_buttons = 0;
-volatile int mouse_delta[2] = {0, 0}; // (dx, dy)
-volatile uint8_t* kbd_report = NULL;
+static volatile uint8_t mouse_buttons = 0;
+static volatile uint8_t last_mouse_buttons = 0;
+static volatile int mouse_delta[2] = {0, 0}; // (dx, dy)
+static volatile uint8_t* kbd_report = (uint8_t*) usb_kbd_no_keys;
+static volatile uint8_t* last_kbd_report = (uint8_t*) usb_kbd_no_keys;
 
 volatile uint8_t next_report_type = USB_TYPE_MOUSE;
 
@@ -61,29 +65,42 @@ int8_t clamp(int input) {
 void Process_USB_Reports() {
     RETURN_CODE_t usb_status = USBDevice_Handle();
     
+    if (usb_status != SUCCESS || USB_PipeStatusIsBusy(hidPipe)) {
+        return; 
+    }
+    
     int8_t local_dx, local_dy;
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
         local_dx = clamp(mouse_delta[0]);
         local_dy = clamp(mouse_delta[1]);
     }
-    printf("%d | %d, %d\n", usb_status, mouse_delta[0], mouse_delta[1]);
     
-    if (usb_status == SUCCESS) {
-        if ((next_report_type == USB_TYPE_MOUSE || kbd_report == NULL) && (mouse_delta[0] != 0 || mouse_delta[1] != 0)) {
-            mouse_move_buffer[1] = mouse_buttons;
-            mouse_move_buffer[2] = local_dx;
-            mouse_move_buffer[3] = local_dy;
-            USB_TransferWriteStart(hidPipe, mouse_move_buffer, 4, false, NULL);
-            ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-                mouse_delta[0] -= local_dx;
-                mouse_delta[1] -= local_dy;
+    bool mouse_moved = (local_dx != 0 || local_dy != 0);
+    bool mouse_btn_changed = (mouse_buttons != last_mouse_buttons);
+    bool kbd_changed = (kbd_report != last_kbd_report);
+    
+    if (mouse_moved || mouse_btn_changed || kbd_changed) {
+        printf("%d | %d, %d, %u, %d | %d\n", usb_status, mouse_delta[0], mouse_delta[1], mouse_buttons, kbd_report == NULL, next_report_type);
+        if (next_report_type == USB_TYPE_MOUSE) {
+            if (mouse_moved || mouse_btn_changed) {
+                mouse_move_buffer[1] = mouse_buttons;
+                mouse_move_buffer[2] = local_dx;
+                mouse_move_buffer[3] = local_dy;
+                
+                USB_TransferWriteStart(hidPipe, mouse_move_buffer, 4, false, NULL);
+                ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+                    
+                    mouse_delta[0] -= local_dx;
+                    mouse_delta[1] -= local_dy;
+                }
+                last_mouse_buttons = mouse_buttons;
             }
             next_report_type = USB_TYPE_KEYBOARD;
-        } else if (next_report_type == USB_TYPE_KEYBOARD && kbd_report != NULL) {
-            USB_TransferWriteStart(hidPipe, kbd_report, 9, false, NULL);
-            next_report_type = USB_TYPE_MOUSE;
         } else if (next_report_type == USB_TYPE_KEYBOARD) {
-            USB_TransferWriteStart(hidPipe, usb_kbd_no_keys, 9, false, NULL);
+            if (kbd_changed) {
+                USB_TransferWriteStart(hidPipe, (uint8_t*) kbd_report, 9, false, NULL);
+                last_kbd_report = kbd_report;
+            }
             next_report_type = USB_TYPE_MOUSE;
         }
      }

@@ -90,12 +90,17 @@ int main(void) {
         Process_USB_Reports();
         
         // Buttons
-        set_left_click((PORTF.IN & LCLICK_BM) == 0);
+        set_left_click((PORTD.IN & LCLICK_BM) == 0);
         
-        if ((PORTF.IN & VIRTKBD_BM) == 0) {
+        if ((PORTD.IN & LCLICK_BM) == 0) {
+            PORTF.OUTTGL = PIN2_bm;
+        }
+        
+        if ((PORTD.IN & VIRTKBD_BM) == 0) {
+            PORTF.OUTTGL = PIN2_bm;
             set_keyboard_press(usb_kbd_super_k);
         } else {
-            set_keyboard_press(NULL);
+            set_keyboard_press(usb_kbd_no_keys);
         }
     }
     return 0;
