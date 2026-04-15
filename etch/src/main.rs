@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use eframe::{egui::{self, Color32, ColorImage, Pos2}, egui_wgpu::{WgpuConfiguration, WgpuSetup, WgpuSetupCreateNew}, wgpu};
+use eframe::{egui::{self, Color32, ColorImage, Pos2}, egui_wgpu::{WgpuConfiguration, WgpuSetup, WgpuSetupCreateNew}, wgpu::{self, Features}};
 
 fn main() -> eframe::Result {
     // force limits lower for raspberry pi
@@ -10,6 +10,7 @@ fn main() -> eframe::Result {
 
         wgpu::DeviceDescriptor {
             label: Some("egui wgpu device"),
+            required_features: Features::empty(),
             required_limits: wgpu::Limits {
                 max_texture_dimension_2d: 3840, // slightly larger for laptop display
                 ..base_limits
