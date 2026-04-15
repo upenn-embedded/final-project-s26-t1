@@ -72,6 +72,7 @@ let
     {
       name = "wifi";
       command = "\${cmd_alacritty} -e 'nmtui' &";
+      image = ../assets/wifi.svg;
     }
     {
       name = "credits";
