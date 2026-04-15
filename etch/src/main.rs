@@ -96,14 +96,11 @@ impl eframe::App for App {
             {
                 if
                     let Some(last_cursor_pos) = self.last_cursor_pos.as_mut()
+                    && let dx = cursor_pos.x-last_cursor_pos.x
+                    && let dy = cursor_pos.y-last_cursor_pos.y
+                    && let dxy2 = dx*dx+dy*dy
                     // prevent jumps on start
-                    && !(
-                        self.blank
-                        && (
-                            (last_cursor_pos.x-cursor_pos.x).abs() > image.width() as f32/10.0
-                            || (last_cursor_pos.y-cursor_pos.y).abs() > image.height() as f32/10.0
-                        )
-                    )
+                    && !(self.blank && dxy2 > 10.0)
                 {
                     let buffer = 4;
                     let rect_x1: usize = usize::saturating_sub(
