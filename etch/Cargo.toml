@@ -8,5 +8,5 @@ eframe = { version = "0.34.1", features = ["wgpu"] }
 
 [patch.crates-io]
 # include fix for https://github.com/gfx-rs/wgpu/issues/9293
-eframe = { git = "https://github.com/emilk/egui.git", rev = "4016dee2bdbfeaecfed529edb6a155088f775119" }
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "c9c7359f5b52f751077e583513efef7cd2c19806" }
+eframe = { git = "https://github.com/clay53/egui.git", rev = "7640ef7f6a046ea04634ad00086ccb9e0f848147" }
+wgpu = { git = "https://github.com/clay53/wgpu.git", rev = "cd33d6d092295e8813a3dadf7bb7dd3056b128d0" }
