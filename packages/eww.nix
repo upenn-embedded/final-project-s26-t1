@@ -16,7 +16,15 @@ let
   title_top = "(${top} + (${row1_top} - ${top} - ${title_height})/2)";
 
   mkWindow = { name, x, y, width, height, content }: ''
-    (defwindow ${name} [screen_width screen_height scale cmd_alacritty cmd_etch]
+    (defwindow ${name}
+      [
+        screen_width
+        screen_height
+        scale
+        cmd_alacritty
+        cmd_etch
+        cmd_files
+      ]
       :monitor 0
       :geometry (geometry
         :x { ${x} }
@@ -42,7 +50,8 @@ let
     }
     {
       name = "files";
-      command = "etch &";
+      command = "\${cmd_files} ~ &";
+      image = ../assets/files.svg;
     }
     {
       name = "time";

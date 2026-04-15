@@ -74,6 +74,7 @@ in
         scale = "$(${getScale})";
         cmd_alacritty = "alacritty";
         cmd_etch = "etch";
+        cmd_files = "pcmanfm-qt";
       };
     in
     [
@@ -96,6 +97,7 @@ in
       pkgs.alacritty
       pkgs.etch
       pkgs.eww-wrapped
+      pkgs.pcmanfm-qt
       pkgs.wvkbd
     ]; 
   in
