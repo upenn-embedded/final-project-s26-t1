@@ -56,7 +56,6 @@ let
     }
     {
       name = "time";
-      command = "etch &";
       overlays = [
         ''(transform
           :scale-x { ${inner_button_size} }
@@ -69,15 +68,12 @@ let
     }
     {
       name = "help";
-      command = "etch &";
     }
     {
       name = "storage";
-      command = "etch &";
     }
     {
       name = "sync";
-      command = "etch &";
     }
     {
       name = "wifi";
@@ -86,7 +82,6 @@ let
     }
     {
       name = "credits";
-      command = "etch &";
     }
   ];
 in
@@ -146,7 +141,7 @@ in
         content = ''
           (overlay
             (button
-              :onclick "${elem.command}"
+              ${if elem ? command then '':onclick "${elem.command}"'' else ""}
                 ${if builtins.length overlays > 0 then "" else ''"${elem.name}"''})
             ${builtins.concatStringsSep " " overlays})
         '';
