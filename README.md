@@ -164,6 +164,88 @@ images & videos: [https://github.com/upenn-embedded/final-project-s26-t1/tree/ma
 
 ## MVP Demo
 
+We did not make a slide deck
+
+### MVP Requirements
+1. Show a system block diagram & explain the hardware implementation.
+    1. https://drive.google.com/file/d/1pIQUzEnvfFoCIa2VsQYxRrLAcQYWJmim/view?usp=sharing
+    1. AVR Microcontroller
+        1. Reads our rotary encoder inputs and translates them to USB HID Mice
+        1. Reads our button inputs and interprets them USB HID Keyboard
+        1. Reads shaking from the IMU and sends those events through the USB HID Keyboard interface
+        1. Sends the USB HID events to our RPI 4B
+        1. (unimplemented) 3 LEDs shows power, shaking, and whether left click is held
+    1. RPI 4B
+        1. Takes the USB HID events
+        1. Boots off of custom Etch A Sketch OS image on SD Card
+        1. WiFI Connection for debugging
+        1. Outputs to the display
+1. Explain your firmware implementation, including application logic and critical drivers you've written.
+    1. AVR (baremetal C)
+    1. RPI 4B
+        1. Runs custom "[Etch A Sketch OS](./rpi-install)"
+            1. Based on [NixOS](https://nixos.org/)
+                1. "Patched" with [nix-hardware](https://github.com/nixos/nixos-hardware) to get the DSI display and GPU working
+            1. Everything pre-configured on flashable image for a vendored OS-like experience
+                1. Image rebuilt with a single command `nix build .#packages.aarch64-linux.rpi4B-img`, only requiring [Nix](https://nixos.org/download/) to be installed
+                1. Build artifact: 
+            1. Logs in to AirPennNet-Device WiFi automatically
+            1. Registers itself as `etch-a-sketch.local` on mDNS, DNS-SD, and Bonjour to avoid problems with dynamic IP addressing
+            1. OpenSSH enabled for remote development without re-flashing
+            1. Uses [Nix Wrapper Modules](https://github.com/BirdeeHub/nix-wrapper-modules) to make OS elements portable between systems (allows rapid testing on development machine)
+            1. Uses customized [Niri](https://github.com/niri-wm/niri) as a lightweight display 
+                1. Pinned to a specific commit to get on-screen keyboard support, avoiding its [temporary removal](https://github.com/nixos/nixos-hardware) (and it was never part of an official release)
+                1. Interprets and acts on hotkeys
+                    1. `Super+Enter`: open terminal
+                    1. `Super+Q`: exit current app
+                    1. `Super+K`: toggle on-screen keyboard
+                    1. `Super+F`: toggle current app fullscreen
+            1. Uses customized [Eww](https://github.com/elkowar/eww) to make the vendor-like dashboard
+                1. Required [PR](https://github.com/BirdeeHub/nix-wrapper-modules/pull/420) to be able to wrap it to make the configuration portable (runs on development machine as well)
+                1. Custom icons
+            1. Uses custmized [Yaru](https://github.com/ubuntu/yaru) theme to make the cursor mimic a real Etch A Sketch cursor
+            1. Uses [wvkbd](https://github.com/jjsullivan5196/wvkbd) for on-screen keyboard
+                1. Required cherry-picking from unstable branch of [nixpkgs](https://github.com/nixos/nixpkgs) to get the version that works with Wayland
+        1. Runs custom [Etch](./etch) drawing program for a minimal Etch A Sketch-like experience
+            1. Programmed in [Rust](https://rust-lang.org/)
+            1. Uses [Egui/Eframe](https://github.com/emilk/egui), a native GUI framework
+                1. It's dependency, WGPU, had to be [forked](https://github.com/clay53/wgpu) to fix bug causing it to [fail on Raspberry Pi](https://github.com/gfx-rs/wgpu/issues/9293) and set the version Egui expects
+                1. It had to be [forked](https://github.com/clay53/egui) to make it compatible with the in-development branch of WGPU
+            1. Always draws following the mouse
+            1. Erases with `Ctrl+Z` (sent when IMU detects shaking)
+1. Demo your device.
+    1. ![](./mvp-media/Drawing.jpg)
+    1. ![](./mvp-media/Assembled.jpg)
+1. Have you achieved some or all of your Software Requirements Specification (SRS)?
+    * [x] SRS-01
+    * [x] SRS-02
+    * [x] SRS-03
+    * [x] SRS-04
+    * [ ] SRS-05
+        * Still need to make it so shake detection is over 1 second
+    * [ ] SRS-06
+        * This software requirement has been abandoned in favor of a black/white screen
+1. Show how you collected data and the outcomes.
+    1. All of these are qualitative, so we just tested it: [./mvp-media](/mvp-media/)
+1. Have you achieved some or all of your Hardware Requirements Specification (HRS)?
+    * [x] HRS-01
+        * Lasts a long time with our USB battery pack
+    * [x] HRS-02
+    * [x] HRS-03
+    * [x] HRS-04
+    * [x] HRS-05
+    * [ ] HRS-06
+1. Show how you collected data and the outcomes.
+1. Show off the remaining elements that will make your project whole: mechanical casework, supporting graphical user interface (GUI), web portal, etc.
+    1. Everything fits nicely in the case
+1. What is the riskiest part remaining of your project?
+    1. The riskiest part is whether or not the E-Ink display arrives in time.
+1. How do you plan to de-risk this?
+    1. It probably won't arrive, so we will design our final enclosure around the LCD we've been using as a backup
+1. What questions or help do you need from the teaching team?
+    1. None
+
+
 ## Final Report
 
 Don't forget to make the GitHub pages public website!
