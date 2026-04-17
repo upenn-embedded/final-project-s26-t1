@@ -246,7 +246,10 @@ We did not make a slide deck
     * [x] HRS-04
     * [x] HRS-05
     * [ ] HRS-06
+        * Wires not connected strongly yet
 1. Show how you collected data and the outcomes.
+    1. For the battery pack lifespan, we ran it for like an hour waiting to demo and it barely went down
+    1. Everything else is qualitative and we know by looking at it/shaking it
 1. Show off the remaining elements that will make your project whole: mechanical casework, supporting graphical user interface (GUI), web portal, etc.
     1. Everything fits nicely in the case
 1. What is the riskiest part remaining of your project?
@@ -256,6 +259,24 @@ We did not make a slide deck
 1. What questions or help do you need from the teaching team?
     1. None
 
+### What to do before final demo
+* Polish OS
+    * Implement hands of the clock
+    * Implement showing stength of WiFI signal
+    * Implement text for storage usage
+    * Implement file syncing (probably with WebDAV)
+    * Create custom wvkbd layout that makes more sense for our application
+* Polish drawing app
+    * Each "erase" should erase the image gradually, lightening it, instead of completely erasing it like a real etch a sketch
+    * Automatic saves and reloads
+* Finalize and stengthen enclosure
+    * Need better method to route USB cabels - probably buying a right angle connector
+    * Need everything to fit
+    * Make knobs grippier
+    * Attach internal wires more securely
+* Finish AVR I/O
+    * Implement LEDs
+    * Implement other 2 buttons
 
 ## Final Report
 
