@@ -27,6 +27,7 @@ extern "C" {
 #define USB_NO_BTNS 0U
     
 extern uint8_t usb_kbd_super_k[9];
+extern uint8_t usb_kbd_super_q[9];
 extern uint8_t usb_kbd_no_keys[9];
 extern uint8_t usb_kbd_letter_k[9];
 extern uint8_t usb_kbd_ctrl_z[9];

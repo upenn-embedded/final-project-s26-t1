@@ -6,8 +6,12 @@
 #include "lib/lsm6dso_driver.h"
 #include <stdint.h>
 
-#define LCLICK_BM PIN0_bm
-#define VIRTKBD_BM PIN1_bm
+#define LCLICK_BM PIN3_bm
+#define VIRTKBD_BM PIN4_bm
+#define QUIT_BM PIN5_bm
+#define LCLICKHOLD_BM PIN6_bm
+
+static bool lclick_hold_flag = false;
 
 void io_init(void) {
     // Rotary encoders
@@ -21,8 +25,15 @@ void io_init(void) {
     PORTA.PIN7CTRL = PORT_PULLUPEN_bm; // encoder Y - B
     
     // Buttons
-    PORTD.PIN0CTRL = PORT_PULLUPEN_bm;
-    PORTD.PIN1CTRL = PORT_PULLUPEN_bm;
+    PORTF.DIRCLR = LCLICK_BM | VIRTKBD_BM | QUIT_BM | LCLICKHOLD_BM;
+    PORTF.PIN3CTRL = PORT_PULLUPEN_bm | PORT_ISC_BOTHEDGES_gc;
+    PORTF.PIN4CTRL = PORT_PULLUPEN_bm | PORT_ISC_BOTHEDGES_gc;
+    PORTF.PIN5CTRL = PORT_PULLUPEN_bm | PORT_ISC_BOTHEDGES_gc;
+    PORTF.PIN6CTRL = PORT_PULLUPEN_bm | PORT_ISC_FALLING_gc;
+    
+    // Debug LED
+    PORTF.DIRSET = PIN2_bm;
+    PORTF.OUTCLR = PIN2_bm;
 }
 
 void timer_init(void) {
@@ -71,12 +82,50 @@ ISR(TCB0_INT_vect) {
     TCB0.INTFLAGS = TCB_CAPT_bm;
 }
 
+ISR(PORTF_PORT_vect) {
+    uint8_t intflags = PORTF.INTFLAGS;
+    if (intflags & LCLICK_BM) {
+        set_left_click((PORTF.IN & LCLICK_BM) == 0);
+        PORTF.OUTTGL = PIN2_bm;
+        PORTF.INTFLAGS = LCLICK_BM;
+    }
+    
+    if (intflags & LCLICKHOLD_BM) {
+        if (!lclick_hold_flag) {
+            set_left_click(true);
+        } else {
+            set_left_click(false);
+        }
+        lclick_hold_flag = !lclick_hold_flag;
+        
+        PORTF.OUTTGL = PIN2_bm;
+        PORTF.INTFLAGS = LCLICKHOLD_BM;
+    }
+    
+    if (intflags & VIRTKBD_BM) {
+        if (!(PORTF.IN & VIRTKBD_BM)) {
+            set_keyboard_press(usb_kbd_super_k);
+        } else {
+            set_keyboard_press(usb_kbd_no_keys);
+        }
+        PORTF.OUTTGL = PIN2_bm;
+        PORTF.INTFLAGS = VIRTKBD_BM;
+    }
+    
+    if (intflags & QUIT_BM) {
+        if (!(PORTF.IN & QUIT_BM)) {
+            set_keyboard_press(usb_kbd_super_q);
+        } else {
+            set_keyboard_press(usb_kbd_no_keys);
+        }
+        PORTF.OUTTGL = PIN2_bm;
+        PORTF.INTFLAGS = QUIT_BM;
+    }
+}
+
 int main(void) {
     // Initialize MCC
     SYSTEM_Initialize();
-    
-    PORTF.DIRSET = PIN2_bm;
-    PORTF.OUTCLR = PIN2_bm;
     
     // Initialize USB
     Initialize_USB();
@@ -90,26 +139,21 @@ int main(void) {
     
     sei();
     
+    bool release_after_shake_flag = false;
+    
     while (1) {
         Process_USB_Reports();
         
-        // Buttons
-        set_left_click((PORTD.IN & LCLICK_BM) == 0);
-        
-        if ((PORTD.IN & LCLICK_BM) == 0) {
-            PORTF.OUTTGL = PIN2_bm;
+        if (release_after_shake_flag) {
+            set_keyboard_press(usb_kbd_no_keys);
+            release_after_shake_flag = false;
         }
         
         if (detect_shake_event()) {
             PORTF.OUTTGL = PIN2_bm;
             set_keyboard_press(usb_kbd_ctrl_z);
             _delay_ms(50); // simulate 50ms keyboard press
-        } else 
-            if ((PORTD.IN & VIRTKBD_BM) == 0) {
-            PORTF.OUTTGL = PIN2_bm;
-            set_keyboard_press(usb_kbd_super_k);
-        } else {
-            set_keyboard_press(usb_kbd_no_keys);
+            release_after_shake_flag = true;
         }
     }
     return 0;

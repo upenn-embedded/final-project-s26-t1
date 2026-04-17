@@ -153,11 +153,11 @@ ISR(PORTD_PORT_vect)
     VPORTD.INTFLAGS = 0xff;
 }
 
-ISR(PORTF_PORT_vect)
-{ 
-    /* Clear interrupt flags */
-    VPORTF.INTFLAGS = 0xff;
-}
+//ISR(PORTF_PORT_vect)
+//{ 
+//    /* Clear interrupt flags */
+//    VPORTF.INTFLAGS = 0xff;
+//}
 
 /**
  End of File
