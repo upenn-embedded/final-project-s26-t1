@@ -182,6 +182,17 @@ We did not make a slide deck
         1. Outputs to the display
 1. Explain your firmware implementation, including application logic and critical drivers you've written.
     1. AVR (baremetal C)
+        1. Main file is main_usb.c, containing a simple loop for sending I2C commands to IMU and processing USB HID reports.
+        2. Timer B is configured to run every ~1ms in CCMP mode. The interrupt for this timer gets the state of the rotary encoders and updates the mouse delta.
+        3. Port F (Pin Change) Interrupt is configured for the 4 buttons on both edges (except for the left click hold button which is falling edge).
+        4. Created `usb_driver.c`, a USB HID driver with support for sending mouse and keyboard reports on the same endpoint, which is not supported in the MCC library).
+            1. Primarily uses the MCC library USBDevice_Handle() and USB_TransferWriteStart() functions.
+            2. Supports asynchronous processing of reports: `main_usb.c` can set the next keyboard press or mouse movement but driver will not send until `Process_USB_Reports` is called in the main loop.
+        5. Created `i2c_driver.c`, which supports synchronous and asynchronous I2C reads and writes. Commands are specified in a struct that is then updated as it proceeds through the I2C protocol steps.
+        6. Created `imu_driver.c`, which is built on top of `i2c_driver.c`.
+            1. Contains an Initialize function to configure the Wake-Up Event on the LSM6DSO.
+            2. Contains a detect_shake_event() to read from the wake-up interrupt register on the LSM6DSO to see if a wake-up event occurred.
+            3. Maintains a counter so that multiple (short) wake-up events occur before a (long) shake event is detected.
     1. RPI 4B
         1. Runs custom "[Etch A Sketch OS](./rpi-install)"
             1. Based on [NixOS](https://nixos.org/)
