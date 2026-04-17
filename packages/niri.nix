@@ -113,7 +113,7 @@ in
     [
       "XCURSOR_PATH"
       ":"
-      "${pkgs.yaru-theme}/share/icons"
+      "${pkgs.etch-a-sketch-Yaru-theme}/share/icons"
     ]
     [
       "PATH"

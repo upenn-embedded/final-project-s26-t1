@@ -25,15 +25,22 @@
       "aarch64-linux"
     ];
     get-rust-bin = pkgs: pkgs.rust-bin.stable.latest.default;
+    pkgsBySystem = system: import nixpkgs {
+      inherit system;
+      overlays = [
+        self.overlays.default
+        (import inputs.rust-overlay)
+        (final: _: {
+          my-rust = get-rust-bin final;
+        })
+      ];
+    };
   in
   {
     devShells = forAllSystems (system: {
       default =
       let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [(import inputs.rust-overlay)];
-        };
+        pkgs = pkgsBySystem system;
         ld_libraries = [
           pkgs.wayland
           pkgs.libxkbcommon
@@ -60,31 +67,17 @@
     };
 
     packages = nixpkgs.lib.recursiveUpdate
-      (forAllSystems (system: {
+      (forAllSystems (system: let pkgs = pkgsBySystem system; in {
         niri-wrapped = wrappers.wrappers.niri.wrap ({...}: {
-          pkgs = import nixpkgs {
-            inherit system;
-            overlays = [ self.overlays.default ];
-          };
+          inherit pkgs;
           imports = [ ./packages/niri.nix ];
         });
         eww-wrapped = wrappers.wrappers.eww.wrap ({...}: {
-          pkgs = import nixpkgs {
-            inherit system;
-            overlays = [ self.overlays.default ];
-          };
+          inherit pkgs;
           imports = [ ./packages/eww.nix ];
         });
-        etch = (import nixpkgs {
-          inherit system;
-          overlays = [
-            self.overlays.default
-            (import inputs.rust-overlay)
-            (final: _: {
-              my-rust = get-rust-bin final;
-            })
-          ];
-        }).callPackage ./etch/default.nix {};
+        etch = pkgs.callPackage ./etch/default.nix {};
+        etch-a-sketch-Yaru-theme = pkgs.callPackage ./packages/etch-a-sketch-Yaru-theme.nix {};
       }))
       {
         aarch64-linux.rpi4B-img = self.nixosConfigurations.etch-a-sketch.config.system.build.sdImage;
@@ -93,6 +86,7 @@
     overlays.default = final: prev: let system = prev.stdenv.hostPlatform.system; in {
       niri-wrapped = self.packages.${system}.niri-wrapped;
       etch = self.packages.${system}.etch;
+      etch-a-sketch-Yaru-theme = self.packages.${system}.etch-a-sketch-Yaru-theme;
       eww-wrapped = self.packages.${system}.eww-wrapped;
       niri = inputs.niri.packages.${system}.default;
       wvkbd = inputs.nixpkgs-unstable.legacyPackages.${system}.wvkbd;
