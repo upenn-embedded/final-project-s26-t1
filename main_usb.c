@@ -11,6 +11,11 @@
 #define QUIT_BM PIN5_bm
 #define LCLICKHOLD_BM PIN6_bm
 
+// Port D LEDs
+#define POWER_LED_BM PIN3_bm
+#define LCLICK_LED_BM PIN4_bm
+#define SHAKE_LED_BM PIN5_bm
+
 static bool lclick_hold_flag = false;
 
 void io_init(void) {
@@ -34,6 +39,12 @@ void io_init(void) {
     // Debug LED
     PORTF.DIRSET = PIN2_bm;
     PORTF.OUTCLR = PIN2_bm;
+    
+    // Enclosure LEDs
+    PORTD.DIRSET = POWER_LED_BM | LCLICK_LED_BM | SHAKE_LED_BM;
+    PORTD.OUTSET = POWER_LED_BM;
+    PORTD.OUTCLR = LCLICK_LED_BM;
+    PORTD.OUTCLR = SHAKE_LED_BM;
 }
 
 void timer_init(void) {
@@ -85,15 +96,19 @@ ISR(TCB0_INT_vect) {
 ISR(PORTF_PORT_vect) {
     uint8_t intflags = PORTF.INTFLAGS;
     if (intflags & LCLICK_BM) {
-        set_left_click((PORTF.IN & LCLICK_BM) == 0);
-        PORTF.OUTTGL = PIN2_bm;
+        if (!lclick_hold_flag) {
+            set_left_click((PORTF.IN & LCLICK_BM) == 0);
+            PORTF.OUTTGL = PIN2_bm;
+        }
         PORTF.INTFLAGS = LCLICK_BM;
     }
     
     if (intflags & LCLICKHOLD_BM) {
         if (!lclick_hold_flag) {
+            PORTD.OUTSET = LCLICK_LED_BM;
             set_left_click(true);
         } else {
+            PORTD.OUTCLR = LCLICK_LED_BM;
             set_left_click(false);
         }
         lclick_hold_flag = !lclick_hold_flag;

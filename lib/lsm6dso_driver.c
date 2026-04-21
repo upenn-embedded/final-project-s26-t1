@@ -1,6 +1,7 @@
 #include "i2c_driver.h"
 #include "lsm6dso_driver.h"
 #include <stdio.h>
+#include <avr/io.h>
 
 void Initialize_IMU() {
     InitializeTWI0();
@@ -47,8 +48,8 @@ void Initialize_IMU() {
     printf("Finished initializing IMU\n");
 }
 
-bool detect_shake_event() {
-    const int REQUIRED_SHAKING_TICKS = 1;
+bool detect_shake_event(uint8_t shaking_ind_bm) {
+    const int REQUIRED_SHAKING_TICKS = 10;
     static int shaking_ticks = 0;
     
     I2CCommand read_cmd = I2C_READ_CMD;
@@ -62,6 +63,7 @@ bool detect_shake_event() {
     if (read_cmd.stage == CMD_STAGE_DONE) {
         // bit 3 of wake_up_src is interrupt status
         if (read_cmd.rx_data & 0x08) {
+            PORTD.OUTSET = shaking_ind_bm;
             shaking_ticks++;
 
             if (shaking_ticks >= REQUIRED_SHAKING_TICKS) {
@@ -72,6 +74,8 @@ bool detect_shake_event() {
         } else {
             if (shaking_ticks > 0) {
                 shaking_ticks--;
+            } else {
+                PORTD.OUTCLR = shaking_ind_bm;
             }
         }
     } else {
