@@ -101,11 +101,6 @@ let
                       :image-width 500
                       :path "${../assets/hour-hand.svg}"))))
         ''
-        ''
-          (transform
-            :style "color: blue;"
-            { formattime(EWW_TIME, "%M")*2 })
-        ''
       ];
     }
     {
