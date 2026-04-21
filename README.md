@@ -199,7 +199,7 @@ We did not make a slide deck
                 1. "Patched" with [nix-hardware](https://github.com/nixos/nixos-hardware) to get the DSI display and GPU working
             1. Everything pre-configured on flashable image for a vendored OS-like experience
                 1. Image rebuilt with a single command `nix build .#packages.aarch64-linux.rpi4B-img`, only requiring [Nix](https://nixos.org/download/) to be installed
-                1. Build artifact: 
+                1. Build artifact: https://drive.google.com/file/d/1Ibafn8uE3A1nxN8xKzGDzw4241MuhPFP/view?usp=sharing
             1. Logs in to AirPennNet-Device WiFi automatically
             1. Registers itself as `etch-a-sketch.local` on mDNS, DNS-SD, and Bonjour to avoid problems with dynamic IP addressing
             1. OpenSSH enabled for remote development without re-flashing
