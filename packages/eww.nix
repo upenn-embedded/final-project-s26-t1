@@ -71,6 +71,41 @@ let
                     :image-width 500
                     :path "${../assets/clock.svg}")))
         ''
+        ''
+          (transform
+            :translate-x { ${border_size} }
+            :translate-y { ${border_size} }
+              (transform
+                :scale-x { ${inner_button_size} }
+                :scale-y { ${inner_button_size} }
+                  (transform
+                    :rotate { (formattime(EWW_TIME, "%M") + formattime(EWW_TIME, "%S")/60)/60*100 }
+                    :transform-origin-x 250
+                    :transform-origin-y 250
+                    (image
+                      :image-width 500
+                      :path "${../assets/minute-hand.svg}"))))
+        ''
+        ''
+          (transform
+            :translate-x { ${border_size} }
+            :translate-y { ${border_size} }
+              (transform
+                :scale-x { ${inner_button_size} }
+                :scale-y { ${inner_button_size} }
+                  (transform
+                    :rotate { (formattime(EWW_TIME, "%H")%12 + formattime(EWW_TIME, "%M")/60)/12*100 }
+                    :transform-origin-x 250
+                    :transform-origin-y 250
+                    (image
+                      :image-width 500
+                      :path "${../assets/hour-hand.svg}"))))
+        ''
+        ''
+          (transform
+            :style "color: blue;"
+            { formattime(EWW_TIME, "%M")*2 })
+        ''
       ];
     }
     {
