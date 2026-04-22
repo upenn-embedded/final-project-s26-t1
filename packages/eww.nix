@@ -124,6 +124,29 @@ let
                     :clockwise true
                     :style "color: black; background-color: #dddddd;")))
         ''
+        ''
+          (transform
+            :translate-x { ${border_size} }
+            :translate-y { ${border_size} }
+              (transform
+                :scale-x { ${inner_button_size} }
+                :scale-y { ${inner_button_size} }
+                  (image
+                    :image-width 500
+                    :path "${../assets/storage-line.svg}")))
+        ''
+        ''
+          (transform
+            :translate-y { -${border_size}*2.6 }
+            :style "color: black; font-size: ''${${border_size}*6}"
+              "''${round(EWW_DISK["/"].used/1000/1000/1000, 1)} GB")
+        ''
+        ''
+          (transform
+            :translate-y { ${border_size}*2.6 }
+            :style "color: black; font-size: ''${${border_size}*6}"
+              "''${round(EWW_DISK["/"].total/1024/1024/1024, 1)} GB")
+        ''
       ];
     }
     {
