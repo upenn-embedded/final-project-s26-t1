@@ -18,7 +18,6 @@ in
         ];
       };
       "Mod+Q" = {
-        # TODO: niri might not be in path if executed with something like nix run .#niri-wrapped
         spawn-sh = ''
           if niri msg -j focused-window | grep -q '"id":'; then
             niri msg action close-window
