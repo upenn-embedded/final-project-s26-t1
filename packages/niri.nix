@@ -18,7 +18,14 @@ in
         ];
       };
       "Mod+Q" = {
-        "close-window" = [];
+        # TODO: niri might not be in path if executed with something like nix run .#niri-wrapped
+        spawn-sh = ''
+          if niri msg -j focused-window | grep -q '"id":'; then
+            niri msg action close-window
+          else
+            etch &
+          fi
+        '';
       };
       "Mod+F" = {
         "maximize-window-to-edges" = [];
