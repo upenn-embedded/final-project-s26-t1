@@ -1,0 +1,55 @@
+   Compiling etch v0.1.0 (/home/clhickey/git/final-project-s26-t1/etch)
+warning: unused import: `ptr::read`
+ --> src/main.rs:1:83
+  |
+1 | ...{BufReader, BufWriter, Read, Write}, ptr::read, sync::Arc};
+  |                                         ^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `try_cast_vec`
+ --> src/main.rs:3:28
+  |
+3 | use bytemuck::{cast_slice, try_cast_vec};
+  |                            ^^^^^^^^^^^^
+
+warning: unused import: `serde_json::to_string`
+ --> src/main.rs:6:5
+  |
+6 | use serde_json::to_string;
+  |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: unreachable expression
+   --> src/main.rs:315:9
+    |
+312 |         panic!();
+    |         -------- any code following this expression is unreachable
+...
+315 |         pixels
+    |         ^^^^^^ unreachable expression
+    |
+    = note: `#[warn(unreachable_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `Read`
+ --> src/main.rs:1:69
+  |
+1 | use std::{fs::{self, File, OpenOptions}, io::{BufReader, BufWriter, Read, Write}, ptr:...
+  |                                                                     ^^^^
+
+warning: unused variable: `pixels`
+   --> src/main.rs:311:13
+    |
+311 |         let pixels = Vec::from(cast_slice(pixels.as_slice()));
+    |             ^^^^^^ help: if this is intentional, prefix it with an underscore: `_pixels`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `etch` (bin "etch") generated 6 warnings (run `cargo fix --bin "etch" -p etch` to apply 4 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.99s
+     Running `target/debug/etch`
+got monitor size of [2256 1504]
+13572096 13572096 1 4
+
+thread 'main' (99102) panicked at src/main.rs:312:9:
+explicit panic
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

@@ -4,7 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+bytemuck = "1.25.0"
+chrono = { version = "0.4.44", features = ["alloc"] }
+dirs = "6.0.0"
 eframe = { version = "0.34.1", features = ["wgpu"] }
+png = "0.18.1"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
 
 [patch.crates-io]
 # include fix for https://github.com/gfx-rs/wgpu/issues/9293

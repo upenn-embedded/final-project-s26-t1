@@ -1,6 +1,9 @@
-use std::sync::Arc;
+use std::{fs::{self, File, OpenOptions}, io::{BufReader, BufWriter, Read, Seek, SeekFrom, Write}, ptr::read, sync::Arc};
 
+use bytemuck::{cast_slice, try_cast_vec};
 use eframe::{egui::{self, Color32, ColorImage, Key, Pos2}, egui_wgpu::{WgpuConfiguration, WgpuSetup, WgpuSetupCreateNew}, wgpu::{self, Features}};
+use serde::{Deserialize, Serialize};
+use serde_json::to_string;
 
 fn main() -> eframe::Result {
     // force limits lower for raspberry pi
@@ -41,6 +44,7 @@ struct App {
     texture: Option<egui::TextureHandle>,
     last_cursor_pos: Option<Pos2>,
     blank: bool,
+    file_set: Option<FileSet>,
 }
 
 impl App {
@@ -51,6 +55,7 @@ impl App {
             texture: None,
             last_cursor_pos: None,
             blank: true,
+            file_set: None,
         }
     }
 }
@@ -71,7 +76,21 @@ impl eframe::App for App {
                 assert!(scale == 1.0, "Scale should be 1");
                 println!("got monitor size of {}", size);
 
-                self.image = Some(ColorImage::filled([size.x as usize, size.y as usize], Color32::WHITE));
+                if let Some(mut file_set) = FileSet::get(size.x as usize, size.y as usize) {
+                    self.image = Some(ColorImage::new(
+                        [
+                            size.x as usize,
+                            size.y as usize,
+                        ],
+                        file_set.pixels(),
+                    ));
+
+                    self.file_set = Some(file_set);
+                } else {
+                    self.image = Some(ColorImage::filled([size.x as usize, size.y as usize], Color32::WHITE));
+
+                    FileSet::new(self.image.as_ref().unwrap(), 0.0, 0.0);
+                }
             }
         }
 
@@ -151,10 +170,171 @@ impl eframe::App for App {
         }
 
         if ui.input(|i| i.modifiers.ctrl && i.key_pressed(Key::Z)) {
-            *image = ColorImage::filled([image.width(), image.height()], Color32::WHITE);
-            texture_handle.set(image.clone(), Default::default());
+            if let Some(cursor_pos) = self.last_cursor_pos {
+                if
+                    let Some(file_set) = self.file_set.as_mut()
+                {
+                    file_set.save(image, cursor_pos.x, cursor_pos.y);
+                }
+                
+                *image = ColorImage::filled([image.width(), image.height()], Color32::WHITE);
+                texture_handle.set(image.clone(), Default::default());
+
+                self.file_set = Some(FileSet::new(image, cursor_pos.x, cursor_pos.y));
+            }
         }
 
         ui.image(egui::load::SizedTexture::from_handle(texture_handle));
+    }
+
+    fn on_exit(&mut self) {
+        if
+            let Some(mut file_set) = self.file_set.take()
+            && let Some(image) = self.image.as_ref()
+            && let Some(cursor_pos) = self.last_cursor_pos
+        {
+            file_set.save(image, cursor_pos.x, cursor_pos.y);
+            drop(file_set);
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+struct Metadata {
+    version: usize,
+    cursor_x: f32,
+    cursor_y: f32,
+}
+
+impl Metadata {
+    fn new(cursor_x: f32, cursor_y: f32) -> Self {
+        Self {
+            version: 1,
+            cursor_x,
+            cursor_y,
+        }
+    }
+
+    fn to_json(&self) -> String {
+        serde_json::to_string(self).expect("Failed to convert metadata to string")
+    }
+}
+
+struct FileSet {
+    image: File,
+    metadata: File,
+}
+
+impl FileSet {
+    fn new(initial_image: &ColorImage, cursor_x: f32, cursor_y: f32) -> FileSet {
+        let mut path = dirs::picture_dir().expect("Must have a pictures directory");
+        assert!(path.is_dir(), "Pictures dir must exist");
+
+        path.push("Etches");
+        if !path.is_dir() {
+            fs::create_dir(&path).expect("Failed to make Etches directory");
+        }
+
+        path.push(format!("{}x{}", initial_image.width(), initial_image.height()));
+        if !path.is_dir() {
+            fs::create_dir(&path).expect("Failed to make directory for resolution");
+        }
+
+        let filename = chrono::Local::now().format("%+").to_string();
+        path.push(&filename);
+
+        let mut metadata_path = path.clone();
+        metadata_path.add_extension("json");
+
+        let image_path = { path.add_extension("png"); path };
+
+        assert!(!metadata_path.exists(), "What to do if metadata file already exists not done");
+        assert!(!image_path.exists(), "What to do if image file already exists not done");
+
+        let image = fs::File::create_new(image_path).expect("Failed to create image file");
+
+        let metadata = fs::File::create_new(metadata_path).expect("Failed to create metadata file");
+        
+        let mut file_set = FileSet {
+            image,
+            metadata,
+        };
+
+        file_set.save(initial_image, cursor_x, cursor_y);
+
+        file_set
+    }
+
+    fn get(width: usize, height: usize) -> Option<FileSet> {
+        let Some(mut path) = dirs::picture_dir() else { return None };
+
+        path.extend(["Etches", format!("{}x{}", width, height).as_str()]);
+
+        let Ok(read_dir) = path.read_dir() else { return None };
+
+        let mut filename = String::new();
+        let mut image: Option<File> = None;
+        let mut metadata: Option<File> = None;
+
+        for file in read_dir {
+            let Ok(dirent) = file else { continue };
+
+            let Some(Some(stem)) = dirent.path().file_stem().map(|s| s.to_str().map(|s| s.to_string())) else { continue };
+
+            if stem > filename || filename.is_empty() {
+                filename.clear();
+                filename.push_str(&stem);
+                image = None;
+                metadata = None;
+            }
+
+            if stem == filename {
+                match dirent.path().extension().map(|s| s.to_str()) {
+                    Some(Some("png")) => if let Ok(opened_image) = OpenOptions::new().read(true).write(true).open(dirent.path()) {
+                        image = Some(opened_image);
+                    },
+                    Some(Some("json")) => if let Ok(opened_metadata) = OpenOptions::new().read(true).write(true).open(dirent.path()) {
+                        metadata = Some(opened_metadata);
+                    },
+                    _ => {}
+                }
+            }
+        }
+
+        if let Some(image) = image && let Some(metadata) = metadata {
+            Some(FileSet {
+                image,
+                metadata,
+            })
+        } else {
+            None
+        }
+    }
+
+    fn save(&mut self, image: &ColorImage, cursor_x: f32, cursor_y: f32) {
+        self.image.set_len(0).expect("Failed to truncate image");
+        self.image.seek(SeekFrom::Start(0)).expect("Failed to sek in image");
+
+        let mut encoder = png::Encoder::new(BufWriter::new(&mut self.image), image.width() as u32, image.height() as u32);
+        encoder.set_color(png::ColorType::Rgba);
+        encoder.set_depth(png::BitDepth::Eight);
+        let mut encoder = encoder.write_header().unwrap();
+        encoder.write_image_data(cast_slice(image.pixels.as_slice())).unwrap();
+        encoder.finish().unwrap();
+
+        self.metadata.write_all(Metadata::new(cursor_x, cursor_y).to_json().as_bytes()).expect("Failed to write metadata data");
+    }
+
+    fn pixels(&mut self) -> Vec<Color32> {
+        //self.image.read_to_end(&mut pixels).expect("Failed to read image");
+        let decoder = png::Decoder::new(BufReader::new(&mut self.image));
+        let mut decoder = decoder.read_info().unwrap();
+        let mut pixels = vec![0; decoder.output_buffer_size().unwrap()]; // slower to make new vec, but don't want to do
+                                     // crazy casts rn
+        decoder.next_frame(&mut pixels).unwrap();
+
+        let pixels = Vec::from(cast_slice(pixels.as_slice()));
+
+        pixels
     }
 }
