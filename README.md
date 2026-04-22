@@ -277,6 +277,35 @@ We did not make a slide deck
 * Finish AVR I/O
     * Implement LEDs
     * Implement other 2 buttons
+ 
+### 5. Updated Software Requirements Specification (SRS)
+
+| ID         | Description                                                                                                                                                                               |
+| :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SRS-01** | The device shall display and persist user-drawn lines on the display. The cursor shall remain at the boundary of the screen if a user attempts to move it beyond the display coordinates. |
+| **SRS-02** | The system shall update the cursor position based on simultaneous inputs from both knobs to do diagonal and curved line rendering.                                                        |
+| **SRS-03** | The system shall respond to knob rotations with a display latency of less than 100 milliseconds to ensure real-time user interaction.                                                     |
+| **SRS-04** | Upon USB connection to a host PC, such as the MCU for the display, the device shall enumerate as a Human Interface Device (HID) and map knob rotations to mouse-drag and click events.    |
+| **SRS-05** | The system shall monitor the IMU and trigger a screen-clear event only when a continuous shaking motion is detected for a duration exceeding 1 second.                                    |
+| **SRS-06** | The device shall indicate using separate LEDs whether the device is powered, whether left click hold is enabled, and whether a screen clear event was triggered.                          |
+
+### Updated Hardware Requirements Specification (HRS)
+
+**Definitions, Abbreviations**
+
+- **USB:** Universal Serial Bus
+- **PC:** Personal Computer
+- **HID:** Human Interface Device
+- **IMU:** Inertial Measurement Unit
+
+| ID         | Description                                                                                                                                                                |
+| :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **HRS-01** | The device shall be powered by a USB power bank and maintain operation for a minimum of 10 minutes under continuous use.                                                   |
+| **HRS-02** | The power management circuit shall maintain uninterrupted system operation during the transition of plugging or unplugging a USB-C cable.                                  |
+| **HRS-03** | A physical power switch shall be integrated to disconnect the battery from all downstream circuitry, resulting in zero current draw (excluding ambient battery discharge). |
+| **HRS-04** | The device enclosure shall feature two knobs positioned at the bottom corners of the display to emulate a mechanical drawing toy.                                          |
+| **HRS-05** | The rotary encoders used for knobs shall be non-detented to provide smooth, continuous rotation without tactile clicks or bumps.                                           |
+| **HRS-06** | The device chassis and internal component mounting shall withstand shaking without loss of electrical connectivity or functional failure.                                  |
 
 ## Final Report
 
