@@ -92,9 +92,9 @@ in
         "" eww_args
       }"
     ];
-    outputs."DSI-1" = {
-      transform = "180";
-    };
+    #outputs."DSI-1" = {
+    #  transform = "180";
+    #};
   };
 
   prefixVar =
