@@ -1,9 +1,8 @@
-use std::{fs::{self, File, OpenOptions}, io::{BufReader, BufWriter, Read, Seek, SeekFrom, Write}, ptr::read, sync::Arc};
+use std::{fs::{self, File, OpenOptions}, io::{BufReader, BufWriter, Read, Seek, SeekFrom, Write}, sync::Arc};
 
-use bytemuck::{cast_slice, try_cast_vec};
-use eframe::{egui::{self, Color32, ColorImage, Key, Pos2}, egui_wgpu::{WgpuConfiguration, WgpuSetup, WgpuSetupCreateNew}, wgpu::{self, Features}};
+use bytemuck::cast_slice;
+use eframe::{egui::{self, Color32, ColorImage, Key, Pos2, ViewportCommand}, egui_wgpu::{WgpuConfiguration, WgpuSetup, WgpuSetupCreateNew}, wgpu::{self, Features}};
 use serde::{Deserialize, Serialize};
-use serde_json::to_string;
 
 fn main() -> eframe::Result {
     // force limits lower for raspberry pi
@@ -42,18 +41,21 @@ struct App {
     frame_counter: usize,
     image: Option<ColorImage>,
     texture: Option<egui::TextureHandle>,
-    last_cursor_pos: Option<Pos2>,
+    cursor_texture: Option<egui::TextureHandle>,
+    last_cursor_pos: Pos2,
     blank: bool,
     file_set: Option<FileSet>,
 }
 
 impl App {
-    fn new(_cc: &eframe::CreationContext) -> Self {
+    fn new(cc: &eframe::CreationContext) -> Self {
+        egui_extras::install_image_loaders(&cc.egui_ctx);
         Self {
             image: None,
             frame_counter: 0,
             texture: None,
-            last_cursor_pos: None,
+            cursor_texture: None,
+            last_cursor_pos: Pos2::ZERO,
             blank: true,
             file_set: None,
         }
@@ -76,6 +78,9 @@ impl eframe::App for App {
                 assert!(scale == 1.0, "Scale should be 1");
                 println!("got monitor size of {}", size);
 
+                ui.send_viewport_cmd(ViewportCommand::CursorGrab(egui::CursorGrab::Locked));
+                ui.send_viewport_cmd(ViewportCommand::CursorVisible(false));
+
                 if let Some(mut file_set) = FileSet::get(size.x as usize, size.y as usize) {
                     self.image = Some(ColorImage::new(
                         [
@@ -85,11 +90,16 @@ impl eframe::App for App {
                         file_set.pixels(),
                     ));
 
+                    let [cursor_x, cursor_y] = file_set.cursor_pos();
+                    self.last_cursor_pos = Pos2::new(cursor_x, cursor_y);
+
                     self.file_set = Some(file_set);
                 } else {
                     self.image = Some(ColorImage::filled([size.x as usize, size.y as usize], Color32::WHITE));
 
-                    FileSet::new(self.image.as_ref().unwrap(), 0.0, 0.0);
+                    self.last_cursor_pos = Pos2::new(size.x/2.0, size.y/2.0);
+
+                    self.file_set = Some(FileSet::new(self.image.as_ref().unwrap(), self.last_cursor_pos.x, self.last_cursor_pos.y));
                 }
             }
         }
@@ -104,96 +114,85 @@ impl eframe::App for App {
             )
         });
 
-        if let Some(cursor_pos) = ui.input(|i| i.pointer.hover_pos()) {
-            // discard if not in screen
-            if
-                cursor_pos.x >= 0.0
-                && cursor_pos.x <= image.width() as f32
-                && cursor_pos.y >= 0.0
-                && cursor_pos.y <= image.height() as f32
-            {
-                if
-                    let Some(last_cursor_pos) = self.last_cursor_pos.as_mut()
-                    && let dx = cursor_pos.x-last_cursor_pos.x
-                    && let dy = cursor_pos.y-last_cursor_pos.y
-                    && let dxy2 = dx*dx+dy*dy
-                    // prevent jumps on start
-                    && !(self.blank && dxy2 > 10.0)
-                {
-                    let buffer = 1;
-                    let rect_x1: usize = usize::saturating_sub(
-                        last_cursor_pos.x.min(cursor_pos.x) as usize,
-                        buffer
-                    );
-                    let rect_x2: usize = usize::min(
-                        image.width()-1,
-                        last_cursor_pos.x.max(cursor_pos.x) as usize + buffer,
-                    );
-                    let rect_y1: usize = usize::saturating_sub(
-                        last_cursor_pos.y.min(cursor_pos.y) as usize,
-                        buffer
-                    );
-                    let rect_y2: usize = usize::min(
-                        image.height()-1,
-                        last_cursor_pos.y.max(cursor_pos.y) as usize + buffer,
-                    );
+        if
+            let Some(motion) = ui.input(|i| i.pointer.motion())
+        {
+            let cursor_pos = (self.last_cursor_pos + motion*2.66)
+                .clamp(Pos2::ZERO, Pos2::new(image.width() as f32, image.height() as f32));
 
-                    for x in rect_x1..=rect_x2 {
-                        let xf = x as f32;
-                        for y in rect_y1..=rect_y2 {
-                            let yf = y as f32;
-                            let dist_from_line =
-                                (
-                                    (cursor_pos.y-last_cursor_pos.y)*xf
-                                    -(cursor_pos.x-last_cursor_pos.x)*yf
-                                    +cursor_pos.x*last_cursor_pos.y
-                                    -cursor_pos.y*last_cursor_pos.x
-                                ).abs()
-                                /(
-                                    (cursor_pos.y-last_cursor_pos.y)*(cursor_pos.y-last_cursor_pos.y)
-                                    +(cursor_pos.x-last_cursor_pos.x)*(cursor_pos.x-last_cursor_pos.x)
-                                ).sqrt();
-                            if dist_from_line < 1.0 {
-                                let index = image.width()*y+x;
-                                image.pixels[index] = Color32::BLACK;
-                            }
-                        }
+            let buffer = 1;
+            let rect_x1: usize = usize::saturating_sub(
+                self.last_cursor_pos.x.min(cursor_pos.x) as usize,
+                buffer
+            );
+            let rect_x2: usize = usize::min(
+                image.width()-1,
+                self.last_cursor_pos.x.max(cursor_pos.x) as usize + buffer,
+            );
+            let rect_y1: usize = usize::saturating_sub(
+                self.last_cursor_pos.y.min(cursor_pos.y) as usize,
+                buffer
+            );
+            let rect_y2: usize = usize::min(
+                image.height()-1,
+                self.last_cursor_pos.y.max(cursor_pos.y) as usize + buffer,
+            );
+
+            for x in rect_x1..=rect_x2 {
+                let xf = x as f32;
+                for y in rect_y1..=rect_y2 {
+                    let yf = y as f32;
+                    let dist_from_line =
+                        (
+                            (cursor_pos.y-self.last_cursor_pos.y)*xf
+                            -(cursor_pos.x-self.last_cursor_pos.x)*yf
+                            +cursor_pos.x*self.last_cursor_pos.y
+                            -cursor_pos.y*self.last_cursor_pos.x
+                        ).abs()
+                        /(
+                            (cursor_pos.y-self.last_cursor_pos.y)*(cursor_pos.y-self.last_cursor_pos.y)
+                            +(cursor_pos.x-self.last_cursor_pos.x)*(cursor_pos.x-self.last_cursor_pos.x)
+                        ).sqrt();
+                    if dist_from_line < 1.0 {
+                        let index = image.width()*y+x;
+                        image.pixels[index] = Color32::BLACK;
                     }
-
-                    *last_cursor_pos = cursor_pos;
-                    self.blank = false;
-                    texture_handle.set(image.clone(), Default::default());
-                } else {
-                    self.last_cursor_pos = Some(cursor_pos);
                 }
             }
+
+            self.last_cursor_pos = cursor_pos;
+            self.blank = false;
+            texture_handle.set(image.clone(), Default::default());
         }
 
         if ui.input(|i| i.modifiers.ctrl && i.key_pressed(Key::Z)) {
-            if let Some(cursor_pos) = self.last_cursor_pos {
-                if
-                    let Some(file_set) = self.file_set.as_mut()
-                {
-                    file_set.save(image, cursor_pos.x, cursor_pos.y);
-                }
-                
-                *image = ColorImage::filled([image.width(), image.height()], Color32::WHITE);
-                texture_handle.set(image.clone(), Default::default());
-
-                self.file_set = Some(FileSet::new(image, cursor_pos.x, cursor_pos.y));
+            let cursor_pos = self.last_cursor_pos;
+            if let Some(file_set) = self.file_set.as_mut() {
+                file_set.save(image, cursor_pos.x, cursor_pos.y);
             }
+            
+            *image = ColorImage::filled([image.width(), image.height()], Color32::WHITE);
+            texture_handle.set(image.clone(), Default::default());
+
+            self.file_set = Some(FileSet::new(image, cursor_pos.x, cursor_pos.y));
         }
 
         ui.image(egui::load::SizedTexture::from_handle(texture_handle));
+        const CURSOR_SIZE: f32 = 7.0;
+        egui::Image::new(egui::include_image!("../cursor.svg"))
+            .paint_at(ui, egui::Rect {
+                min: Pos2::new(self.last_cursor_pos.x-CURSOR_SIZE/2.0, self.last_cursor_pos.y-CURSOR_SIZE/2.0),
+                max: Pos2::new(self.last_cursor_pos.x+CURSOR_SIZE/2.0, self.last_cursor_pos.y+CURSOR_SIZE/2.0)
+            });
     }
 
     fn on_exit(&mut self) {
         if
             let Some(mut file_set) = self.file_set.take()
             && let Some(image) = self.image.as_ref()
-            && let Some(cursor_pos) = self.last_cursor_pos
         {
-            file_set.save(image, cursor_pos.x, cursor_pos.y);
+            file_set.save(image, self.last_cursor_pos.x, self.last_cursor_pos.y);
+            println!("Saved before exit!");
             drop(file_set);
         }
     }
@@ -313,7 +312,7 @@ impl FileSet {
 
     fn save(&mut self, image: &ColorImage, cursor_x: f32, cursor_y: f32) {
         self.image.set_len(0).expect("Failed to truncate image");
-        self.image.seek(SeekFrom::Start(0)).expect("Failed to sek in image");
+        self.image.seek(SeekFrom::Start(0)).expect("Failed to seek in image");
 
         let mut encoder = png::Encoder::new(BufWriter::new(&mut self.image), image.width() as u32, image.height() as u32);
         encoder.set_color(png::ColorType::Rgba);
@@ -322,6 +321,8 @@ impl FileSet {
         encoder.write_image_data(cast_slice(image.pixels.as_slice())).unwrap();
         encoder.finish().unwrap();
 
+        self.metadata.set_len(0).expect("Failed to truncate metadata");
+        self.metadata.seek(SeekFrom::Start(0)).expect("Failed to seek in metadata");
         self.metadata.write_all(Metadata::new(cursor_x, cursor_y).to_json().as_bytes()).expect("Failed to write metadata data");
     }
 
@@ -336,5 +337,12 @@ impl FileSet {
         let pixels = Vec::from(cast_slice(pixels.as_slice()));
 
         pixels
+    }
+
+    fn cursor_pos(&mut self) -> [f32; 2] {
+        let mut metadata_string = String::new();
+        self.metadata.read_to_string(&mut metadata_string).unwrap();
+        let metadata: Metadata = serde_json::from_str(&metadata_string).unwrap();
+        [metadata.cursor_x, metadata.cursor_y]
     }
 }

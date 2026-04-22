@@ -8,6 +8,7 @@ bytemuck = "1.25.0"
 chrono = { version = "0.4.44", features = ["alloc"] }
 dirs = "6.0.0"
 eframe = { version = "0.34.1", features = ["wgpu"] }
+egui_extras = { version = "*", features = ["svg"] }
 png = "0.18.1"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
@@ -15,4 +16,5 @@ serde_json = "1.0.149"
 [patch.crates-io]
 # include fix for https://github.com/gfx-rs/wgpu/issues/9293
 eframe = { git = "https://github.com/clay53/egui.git", rev = "7640ef7f6a046ea04634ad00086ccb9e0f848147" }
+egui_extras = { git = "https://github.com/clay53/egui.git", rev = "7640ef7f6a046ea04634ad00086ccb9e0f848147" }
 wgpu = { git = "https://github.com/clay53/wgpu.git", rev = "cd33d6d092295e8813a3dadf7bb7dd3056b128d0" }
