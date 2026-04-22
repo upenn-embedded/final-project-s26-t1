@@ -1,6 +1,6 @@
 # Nix Settings Format: https://birdeehub.github.io/nix-wrapper-modules/wrapperModules/niri.html
 # Niri Config Wiki: https://github.com/niri-wm/niri/wiki/Getting-Started
-{pkgs, lib, ...}:
+{pkgs, lib, config, ...}:
 let
   getWidthBash = "wlr-randr | awk '/current/ {print $1; exit}' | cut -d'x' -f1";
   getHeightBash = "wlr-randr | awk '/current/ {print $1; exit}' | cut -d'x' -f2";
@@ -102,6 +102,7 @@ in
   let
     # Programs that must be available to Niri environment
     envPackages = [
+      "${placeholder config.outputName}" # self
       pkgs.wlr-randr
       pkgs.gawk
       pkgs.coreutils
