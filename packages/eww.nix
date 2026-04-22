@@ -137,13 +137,13 @@ let
         ''
         ''
           (transform
-            :translate-y { -${border_size}*2.6 }
+            :translate-y { -${border_size}*2.2 }
             :style "color: black; font-size: ''${${border_size}*6}"
               "''${round(EWW_DISK["/"].used/1000/1000/1000, 1)} GB")
         ''
         ''
           (transform
-            :translate-y { ${border_size}*2.6 }
+            :translate-y { ${border_size}*2.2 }
             :style "color: black; font-size: ''${${border_size}*6}"
               "''${round(EWW_DISK["/"].total/1024/1024/1024, 1)} GB")
         ''
