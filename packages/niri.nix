@@ -87,6 +87,7 @@ in
       };
     in
     [
+      "xdg-user-dirs-update"
       "pkill -x eww; eww daemon && eww open-many ${builtins.concatStringsSep " " eww_windows} ${lib.foldlAttrs
         (acc: arg: cmd: acc + ''--arg ${arg}=${cmd} '')
         "" eww_args
@@ -106,6 +107,7 @@ in
       pkgs.gawk
       pkgs.coreutils
       pkgs.procps
+      pkgs.xdg-user-dirs
 
       pkgs.alacritty
       pkgs.etch
