@@ -3,6 +3,15 @@
 #include <stdio.h>
 #include <avr/io.h>
 
+// target score required to trigger valid shake event
+#define SHAKE_SCORE_THRESHOLD 2000
+
+// points added to score when IMU registers movement
+#define SCORE_ACTIVE_BUMP 2
+
+// points subtracted from score when IMU registers no movement
+#define SCORE_IDLE_DECAY 1
+
 void Initialize_IMU() {
     InitializeTWI0();
     
@@ -26,11 +35,11 @@ void Initialize_IMU() {
     
     while (TWI0_IsBusy());
     
-    // set wakeup threshold (~125 mg)
+    // set wakeup threshold
     I2CCommand ths_cmd = I2C_WRITE_CMD;
     ths_cmd.device_address = LSM6DSO_ADDR;
     ths_cmd.reg = LSM6DSO_WAKE_UP_THS;
-    ths_cmd.tx_data = 0x04;
+    ths_cmd.tx_data = 0x01;
     
     TWI0_WriteAsync(&ths_cmd);
         
@@ -49,8 +58,7 @@ void Initialize_IMU() {
 }
 
 bool detect_shake_event(uint8_t shaking_ind_bm) {
-    const int REQUIRED_SHAKING_TICKS = 10;
-    static int shaking_ticks = 0;
+    static int activity_score = 0;
     
     I2CCommand read_cmd = I2C_READ_CMD;
     read_cmd.device_address = LSM6DSO_ADDR;
@@ -63,19 +71,27 @@ bool detect_shake_event(uint8_t shaking_ind_bm) {
     if (read_cmd.stage == CMD_STAGE_DONE) {
         // bit 3 of wake_up_src is interrupt status
         if (read_cmd.rx_data & 0x08) {
+            
             PORTD.OUTSET = shaking_ind_bm;
-            shaking_ticks++;
-
-            if (shaking_ticks >= REQUIRED_SHAKING_TICKS) {
-//                printf("shaking detected for %d secs\n", (REQUIRED_SHAKING_TICKS * 100) / 1000);
-                shaking_ticks = 0;
+            
+            // acceleration is above threshold so bump score
+            activity_score += SCORE_ACTIVE_BUMP;
+            
+            if (activity_score >= SHAKE_SCORE_THRESHOLD) {
+                // Shake complete
+                activity_score = 0; 
+                PORTD.OUTCLR = shaking_ind_bm;
                 return true;
             }
+            
         } else {
-            if (shaking_ticks > 0) {
-                shaking_ticks--;
-            } else {
-                PORTD.OUTCLR = shaking_ind_bm;
+            // acceleration is below threshold so decrease score
+            PORTD.OUTCLR = shaking_ind_bm;
+            
+            activity_score -= SCORE_IDLE_DECAY;
+            
+            if (activity_score < 0) {
+                activity_score = 0;
             }
         }
     } else {

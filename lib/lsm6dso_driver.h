@@ -22,7 +22,7 @@ extern "C" {
     
 void Initialize_IMU();    
 
-bool detect_shake_event();
+bool detect_shake_event(uint8_t shaking_ind_bm);
 
 
 #ifdef	__cplusplus

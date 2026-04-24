@@ -1,127 +1,177 @@
-#define F_CPU 16000000UL
-#define joystick_pin_x DDRC0
-#define joystick_pin_y DDRC1
-
-#define clear_pin DDRC2
-
-#define MAX_ADC_VALUE 1023
-
-
+#include "lib/usb_driver.h"
+#include "mcc_generated_files/system/system.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "lib/ST7735.h"
-#include "lib/LCD_GFX.h"
-#include "lib/uart.h"
 #include <util/delay.h>
+#include "lib/lsm6dso_driver.h"
+#include <stdint.h>
+#include <util/atomic.h>
 
-#include <stdio.h>
+// Port F buttons
+#define LCLICK_BM PIN3_bm
+#define VIRTKBD_BM PIN4_bm
+#define QUIT_BM PIN5_bm
+#define LCLICKHOLD_BM PIN6_bm
 
-int joystick_center = 512;
+// Port D LEDs
+#define POWER_LED_BM PIN3_bm
+#define LCLICK_LED_BM PIN4_bm
+#define SHAKE_LED_BM PIN5_bm
 
-uint16_t color = 0;
+static bool lclick_hold_flag = false;
 
-int cursor_x = 10;
-int cursor_y = 30;
+void io_init(void) {
+    // Rotary encoders
+    // set PA4, PA5, PA6, PA7 as inputs
+    PORTA.DIRCLR = PIN4_bm | PIN5_bm | PIN6_bm | PIN7_bm;
 
-void ADC_init(void) {
-    ADMUX = (1 << REFS0); // AVcc reference, ADC0 default
-
-    ADCSRA = (1 << ADEN)  // Enable ADC
-           | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // prescaler 128
-}
-
-void Initialize()
-{
-    uart_init();
+    // Enable pullup for all 4 pins
+    PORTA.PIN4CTRL = PORT_PULLUPEN_bm; // encoder X - A
+    PORTA.PIN5CTRL = PORT_PULLUPEN_bm; // encoder X - B
+    PORTA.PIN6CTRL = PORT_PULLUPEN_bm; // encoder Y - A
+    PORTA.PIN7CTRL = PORT_PULLUPEN_bm; // encoder Y - B
     
-	lcd_init();
-
-    // Set paddle control pins as analog input
-    ADC_init();
-
-    // Set clear pin as input with pull-up
-    DDRC &= ~(1 << clear_pin);
-    PORTC |= (1 << clear_pin);
+    // Buttons
+    PORTF.DIRCLR = LCLICK_BM | VIRTKBD_BM | QUIT_BM | LCLICKHOLD_BM;
+    PORTF.PIN3CTRL = PORT_PULLUPEN_bm | PORT_ISC_BOTHEDGES_gc;
+    PORTF.PIN4CTRL = PORT_PULLUPEN_bm | PORT_ISC_BOTHEDGES_gc;
+    PORTF.PIN5CTRL = PORT_PULLUPEN_bm | PORT_ISC_BOTHEDGES_gc;
+    PORTF.PIN6CTRL = PORT_PULLUPEN_bm | PORT_ISC_FALLING_gc;
+    
+    // Debug LED
+    PORTF.DIRSET = PIN2_bm;
+    PORTF.OUTCLR = PIN2_bm;
+    
+    // Enclosure LEDs
+    PORTD.DIRSET = POWER_LED_BM | LCLICK_LED_BM | SHAKE_LED_BM;
+    PORTD.OUTSET = POWER_LED_BM;
+    PORTD.OUTCLR = LCLICK_LED_BM;
+    PORTD.OUTCLR = SHAKE_LED_BM;
 }
 
-
-
-uint16_t ADC_read(uint8_t channel) {
-    ADMUX = (ADMUX & 0xF0) | (channel & 0x0F); // select channel
-
-    ADCSRA |= (1 << ADSC); // start conversion
-    while (ADCSRA & (1 << ADSC)); // wait
-
-    return ADC;
+void timer_init(void) {
+    TCB0.CCMP = 1200; // set interrupt to every 1ms (12MHz / 1000)
+    TCB0.INTCTRL = TCB_CAPT_bm;
+    TCB0.CTRLA = TCB_CLKSEL_DIV1_gc | TCB_ENABLE_bm;
 }
 
-float scale_joystick(int adc_value) {
-    float scaled = ((float) adc_value) / ((float) MAX_ADC_VALUE) * 2.0 - 1.0;
-    return (scaled < 0.06 && scaled > -0.06) ? 0.0 : scaled;
-}
+ISR(TCB0_INT_vect) {
+    static uint8_t last_state = 0;
+    
+    // capture the current state of the last 4 pins of PORTA
+    uint8_t current_state = (PORTA.IN >> 4) & 0x0F;
 
-float get_joystick_x_value() {
-    int value = ADC_read(joystick_pin_x);
-
-    return scale_joystick(value);
-}
-
-float get_joystick_y_value() {
-    int value = ADC_read(joystick_pin_y);
-
-    return scale_joystick(value);
-}
-
-void update_cursor(int new_x, int new_y){
-    if (new_y >= LCD_HEIGHT) {
-        new_y = LCD_HEIGHT - 1;
-    }
-    if (new_y < 0) {
-        new_y = 0; 
-    }
-
-    if (new_x >= LCD_WIDTH) {
-        new_x = LCD_WIDTH - 1;
-    }
-    if (new_x < 0) {
-        new_x = 0;
-    }
-
-    LCD_drawLine(cursor_x, cursor_y, new_x, new_y, color);
-
-    cursor_x = new_x;
-    cursor_y = new_y;
-}
-
-int get_clear_button() {
-    return !(PINC & (1 << clear_pin));
-}
-
-
-
-int main(void)
-{
-	Initialize();
-    LCD_setScreen(rgb565(255, 255, 255)); 
-
-		
-    while (1) 
-    {
-        if (get_clear_button()) {
-            LCD_setScreen(rgb565(255, 255, 255)); // Clear screen
+    if (current_state != last_state) {
+        // toggle LED for debugging
+        PORTF.OUTTGL = PIN2_bm;
+        
+        // process x axis encoder
+        uint8_t curr_x = current_state & 0x03;
+        uint8_t last_x = last_state & 0x03;
+        
+        if (curr_x != last_x) {
+            if ((last_x & 0x01) ^ ((curr_x & 0x02) >> 1)) {
+                delta_next_mouse_move(1, 0);
+            } else {
+                delta_next_mouse_move(-1, 0);
+            }
         }
 
-        float get_x_change = get_joystick_x_value() * 3.0;
-        float get_y_change = get_joystick_y_value() * 3.0;
+        // process y axis encoder
+        uint8_t curr_y = (current_state >> 2) & 0x03;
+        uint8_t last_y = (last_state >> 2) & 0x03;
         
-        printf("%f %f\n", get_x_change, get_y_change);
+        if (curr_y != last_y) {
+            if ((last_y & 0x01) ^ ((curr_y & 0x02) >> 1)) {
+                delta_next_mouse_move(0, 1);
+            } else {
+                delta_next_mouse_move(0, -1);
+            }
+        }
 
-        int new_x = cursor_x + get_x_change;
-        int new_y = cursor_y + get_y_change;
-
-        update_cursor(new_x, new_y);
-
-        _delay_ms(20); // Delay for a short period to display speed
-        
+        last_state = current_state;
     }
+    
+    TCB0.INTFLAGS = TCB_CAPT_bm;
+}
+
+ISR(PORTF_PORT_vect) {
+    uint8_t intflags = PORTF.INTFLAGS;
+    if (intflags & LCLICK_BM) {
+        if (!lclick_hold_flag) {
+            set_left_click((PORTF.IN & LCLICK_BM) == 0);
+            PORTF.OUTTGL = PIN2_bm;
+        }
+        PORTF.INTFLAGS = LCLICK_BM;
+    }
+    
+    if (intflags & LCLICKHOLD_BM) {
+        if (!lclick_hold_flag) {
+            PORTD.OUTSET = LCLICK_LED_BM;
+            set_left_click(true);
+        } else {
+            PORTD.OUTCLR = LCLICK_LED_BM;
+            set_left_click(false);
+        }
+        lclick_hold_flag = !lclick_hold_flag;
+        
+        PORTF.OUTTGL = PIN2_bm;
+        PORTF.INTFLAGS = LCLICKHOLD_BM;
+    }
+    
+    if (intflags & VIRTKBD_BM) {
+        if (!(PORTF.IN & VIRTKBD_BM)) {
+            set_keyboard_press(usb_kbd_super_k);
+        } else {
+            set_keyboard_press(usb_kbd_no_keys);
+        }
+        PORTF.OUTTGL = PIN2_bm;
+        PORTF.INTFLAGS = VIRTKBD_BM;
+    }
+    
+    if (intflags & QUIT_BM) {
+        if (!(PORTF.IN & QUIT_BM)) {
+            set_keyboard_press(usb_kbd_super_q);
+        } else {
+            set_keyboard_press(usb_kbd_no_keys);
+        }
+        PORTF.OUTTGL = PIN2_bm;
+        PORTF.INTFLAGS = QUIT_BM;
+    }
+}
+
+int main(void) {
+    // Initialize MCC
+    SYSTEM_Initialize();
+    
+    // Initialize USB
+    Initialize_USB();
+    
+    // Initialize IMU
+    Initialize_IMU();
+    
+    // Initialize I/O and timer for rotary encoders
+    io_init();
+    timer_init();
+    
+    sei();
+    
+    bool release_after_shake_flag = false;
+    
+    while (1) {
+        Process_USB_Reports();
+        
+        if (release_after_shake_flag) {
+            set_keyboard_press(usb_kbd_no_keys);
+            release_after_shake_flag = false;
+        }
+        
+        if (detect_shake_event(SHAKE_LED_BM)) {
+            PORTF.OUTTGL = PIN2_bm;
+            set_keyboard_press(usb_kbd_ctrl_z);
+            _delay_ms(50); // simulate 50ms keyboard press
+            release_after_shake_flag = true;
+        }
+    }
+    return 0;
 }
