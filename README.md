@@ -287,7 +287,7 @@ We did not make a slide deck
 | **SRS-03** | The system shall respond to knob rotations with a display latency of less than 100 milliseconds to ensure real-time user interaction.                                                     |
 | **SRS-04** | Upon USB connection to a host PC, such as the MCU for the display, the device shall enumerate as a Human Interface Device (HID) and map knob rotations to mouse-drag and click events.    |
 | **SRS-05** | The system shall monitor the IMU and trigger a screen-clear event only when a continuous shaking motion is detected for a duration exceeding 1 second.                                    |
-| **SRS-06** | The device shall indicate using separate LEDs whether the device is powered, whether left click hold is enabled, and whether a screen clear event was triggered.                          |
+| **SRS-06** | The device shall indicate using separate LEDs whether the device is powered, whether left click hold is enabled, and whether shaking is detected.                                         |
 
 ### Updated Hardware Requirements Specification (HRS)
 
