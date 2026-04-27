@@ -48,7 +48,6 @@
         ];
       in pkgs.mkShell {
         buildInputs = [
-          pkgs.jekyll
           pkgs.bundler
           (get-rust-bin pkgs)
         ];
