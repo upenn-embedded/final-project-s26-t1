@@ -54,7 +54,7 @@
             table caption {
                 border: 1px solid black;
                 font-weight: bold;
-                font-size: 1.5em;
+                font-size: 1.25em;
             }
 
             th, td {
@@ -122,6 +122,7 @@
             <iframe src="https://drive.google.com/file/d/1Ipk-cZEMz2bkdB5PhEX0tyHs0H4efPDP/preview" width="416" height="349" allow="fullscreen"></iframe>
             <figcaption>Video showcase by Elan Goldman</figcaption>
         </figure>
+
         <section>
             <h2>The Team</h2>
             <div id="team-members">
@@ -153,6 +154,83 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <section>
+            <h2>The AVR As A USB Device</h2>
+            <p>
+                Cameron programmed our <a href="https://www.microchip.com/en-us/development-tool/ev59f82a">AVR64DU32 Curiosity Nano</a> to act as both a USB HID Keyboard and a USB HID Mouse, which required significant manual editing of the USB code MPLAB Code Configurator generated. However, this made it much easier to integrate with our Raspberry Pi and test as since it's then "just a USB device", it can be plugged into basically any computer.
+            </p>
+            <p>
+                Cameron also wrote a custom I2C implementation in bare metal C to detect prolonged shaking of the device through the <a href="https://www.st.com/en/mems-and-sensors/lsm6dso.html">LSM6DSO IMU</a>.
+            </p>
+            <table>
+                <thead>
+                    <th scope="col">Sensor Action</th>
+                    <th scope="col">USB Action</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">Prolonged Shaking of IMU</th>
+                        <td>Ctrl-Z (erases drawing)</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Left Potentiometer Clockwise Rotation</th>
+                        <td>Cursor to Right</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Left Potentiometer Counter-Clockwise Rotation</th>
+                        <td>Cursor to Left</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Right Potentiometer Clockwise Rotation</th>
+                        <td>Cursor Up</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Right Potentiometer Counter-Clockwise Rotation</th>
+                        <td>Rursor Down</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Leftmost Button</th>
+                        <td>Left Click</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Middle-Left Button</th>
+                        <td>Super + K (toggle virtual keyboard)</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Middle-Right Button</th>
+                        <td>Super + Q (quit active window or open Etch Drawing Program)</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Rightmost Button</th>
+                        <td>Toggle Left Click Hold (for convenient drawing in non-native apps)</td>
+                    </tr>
+                </tbody>
+                <caption>Sensor Action → USB HID Action</caption>
+            </table>
+
+            <table>
+                <thead>
+                    <th scope="col">LED</th>
+                    <th scope="col">Description</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">Green (left)</th>
+                        <td>Flashes when the Etch A Sketch is shaked to indicate the start of the erasing timer</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Yellow (middle)</th>
+                        <td>Lit while left-click hold is enabled</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Red (right)</th>
+                        <td>Lit while the AVR is powered and initialized</td>
+                    </tr>
+                </tbody>
+                <caption>Status LEDS</caption>
+            </table>
         </section>
 
         <section>
@@ -211,6 +289,22 @@
             <figure>
                 <img src="./website-media/400x400-digital-etch-a-sketch.jpg" style="max-width: 30em;"></img>
                 <figcaption>400x400 photo taken by Elan of the OS dashboard made by Clayton running on the assembled Digital Etch A Sketch. Buttons from top-left to bottom-right: launch Etch Drawing Program, launch file explorer (pcmanfm-qt), working analog clock, battery power indicator (non-functional), storage usage indicator, file sync status (non-functional), WiFi (launch nmtui in Alacritty), web browser (defaults to <a href="https://garticphone.com/">Gartic Phone</a>)</figcaption>
+            </figure>
+        </section>
+
+        <section>
+            <h2>Etch: Enforced-Etch-A-Sketch-Like Drawing Program</h2>
+            <p>
+                Clayton used <a href="https://github.com/emilk/egui/tree/main/crates/eframe">egui/eframe</a> to make a simple drawing program. It required forking <a href="https://github.com/clay53/egui">egui</a> and <a href="https://github.com/clay53/wgpu/tree/v29.1">WGPU</a> to fix a bug that broke compatibility with Raspberry Pi and other low-power devices.
+            </p>
+
+            <p>
+                The program features "always active drawing", enforcing Etch-A-Sketch like drawing. It also automatically saves and reloads drawings and cursor positions so that you can pick up where you left off and 
+            </p>
+
+            <figure>
+                <img src="./website-media/front-drawing.jpeg" style="max-width: 30em;"></img>
+                <figcaption>"Hello Stranger" with a happy face drawn by Elan with the Etch Drawing Program</figcaption>
             </figure>
         </section>
 
