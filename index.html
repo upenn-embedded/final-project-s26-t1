@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <script src="./website-libraries/viewstl/build/stl_viewer.min.js"></script>
+
         <style>
             body {
                 font-family: Georgia, serif;
@@ -33,7 +35,7 @@
             }
 
             a:hover {
-                color: darkblue;
+                color: #666;
                 text-decoration: underline;
             }
 
@@ -59,48 +61,89 @@
                 place-content: center;
                 align-items: center;
             }
+
+            #enclosure-parts {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                place-items: center;
+                column-gap: 1em;
+                overflow: hidden;
+            }
         </style>
     </head>
     <body>
         <h1>Digital Etch A Sketch</h1>
         <figure>
-            <iframe src="https://drive.google.com/file/d/1Ipk-cZEMz2bkdB5PhEX0tyHs0H4efPDP/preview" width="416" height="349" allow="fullscreen"></iframe>
+            <!--<iframe src="https://drive.google.com/file/d/1Ipk-cZEMz2bkdB5PhEX0tyHs0H4efPDP/preview" width="416" height="349" allow="fullscreen"></iframe>-->
             <figcaption>Video showcase by Elan Goldman</figcaption>
         </figure>
-        <h2>The Team</h2>
-        <div id="team-members">
-            <div>
-                <h3>Cameron Shaw</h3>
-                <img src="./website-media/cameron-shaw.jpg"></img>
-                <p>AVR & USB Programming</p>
+        <section>
+            <h2>The Team</h2>
+            <div id="team-members">
                 <div>
-                    <img src="https://cameronshaw.me/favicon.ico" alt="Personal Website" title="Personal Website"></img>
-                    <a href="https://cameronshaw.me">cameronshaw.me</a>
+                    <h3>Cameron Shaw</h3>
+                    <img src="./website-media/cameron-shaw.jpg"></img>
+                    <p>AVR & USB Programming</p>
+                    <div>
+                        <img src="https://cameronshaw.me/favicon.ico" alt="Personal Website" title="Personal Website"></img>
+                        <a href="https://cameronshaw.me">cameronshaw.me</a>
+                    </div>
+                </div>
+                <div>
+                    <h3>Clayton Hickey</h3>
+                    <img src="./website-media/clayton-hickey.webp"></img>
+                    <p>Etch A Sketch OS, Etch Drawing Program, This Website</p>
+                    <div>
+                        <img src="https://claytonhickey.me/favicon.ico" alt="Personal Website" title="Personal Website"></img>
+                        <a href="https://claytonhickey.me">claytonhickey.me</a>
+                    </div>
+                </div>
+                <div>
+                    <h3>Elan Goldman</h3>
+                    <img src="./website-media/elan-goldman.png"></img>
+                    <p>Enclosure Design and Assembly</p>
+                    <div>
+                        <img src="./website-media/elan-goldman.png" alt="Personal Website" title="Personal Website"></img>
+                        <a href="https://Elangoldman.com">Elangoldman.com</a>
+                    </div>
                 </div>
             </div>
-            <div>
-                <h3>Clayton Hickey</h3>
-                <img src="./website-media/clayton-hickey.webp"></img>
-                <p>Etch A Sketch OS, This Website</p>
-                <div>
-                    <img src="https://claytonhickey.me/favicon.ico" alt="Personal Website" title="Personal Website"></img>
-                    <a href="https://claytonhickey.me">claytonhickey.me</a>
-                </div>
-            </div>
-            <div>
-                <h3>Elan Goldman</h3>
-                <img src="./website-media/elan-goldman.png"></img>
-                <p>Enclosure Design and Assembly</p>
-                <div>
-                    <img src="./website-media/elan-goldman.png" alt="Personal Website" title="Personal Website"></img>
-                    <a href="https://Elangoldman.com">Elangoldman.com</a>
-                </div>
-            </div>
-        </div>
+        </section>
 
-        <h2>A Full Operating System Configuration In A Single Image</h2>
-        <p>
-            By utilizing <a href="https://nixos.org">NixOS</a>, we were able to 
-        </p>
+        <section>
+            <h2>Simple, Two-Piece Enclosure</h2>
+            <p>
+                Elan made with <a href="https://www.solidworks.com/">SolidWorks</a>, an industry-standard CAD tool, an easily 3D-printable two-piece screw-together enclosure with convenient attachments for all our components.
+            </p>
+                
+            <div id="enclosure-parts">
+                <figure>
+                    <div id="topEnclosure"></div>
+                    <figcaption><a href="./enclosure/top.stl">Top enclosure assembly</a> designed by Elan Goldman</figcaption>
+                </figure>
+                <figure>
+                    <div id="bottomEnclosure"></div>
+                    <figcaption><a href="./enclosure/bottom.stl">Bottom enclosure assembly</a> designed by Elan Goldman</figcaption>
+                </figure>
+            </div>
+
+            <script>
+                new StlViewer(topEnclosure, {models: [{
+                    id: 0,
+                    filename: "../../../enclosure/top.stl",
+                }]});
+                new StlViewer(bottomEnclosure, {models: [{
+                    id: 0,
+                    filename: "../../../enclosure/bottom.stl",
+                }]});
+            </script>
+        </section>
+
+        <section>
+            <h2>A Full Operating System Configuration In A Single Image</h2>
+            <p>
+                By utilizing <a href="https://nixos.org">NixOS</a>, we were able to 
+            </p>
+        </section>
     </body>
 </html>
