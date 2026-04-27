@@ -101,6 +101,19 @@
                 column-gap: 1em;
                 overflow: hidden;
             }
+
+            #additional-photos {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                place-items: center;
+                column-gap: 1em;
+                row-gap: 1em;
+                overflow: hidden;
+            }
+
+            #additional-photos figure {
+                margin: 0;
+            }
         </style>
     </head>
     <body>
@@ -199,6 +212,45 @@
                 <img src="./website-media/400x400-digital-etch-a-sketch.jpg" style="max-width: 30em;"></img>
                 <figcaption>400x400 photo taken by Elan of the OS dashboard made by Clayton running on the assembled Digital Etch A Sketch. Buttons from top-left to bottom-right: launch Etch Drawing Program, launch file explorer (pcmanfm-qt), working analog clock, battery power indicator (non-functional), storage usage indicator, file sync status (non-functional), WiFi (launch nmtui in Alacritty), web browser (defaults to <a href="https://garticphone.com/">Gartic Phone</a>)</figcaption>
             </figure>
+        </section>
+
+        <section>
+            <h2>Additional Photos</h2>
+
+            <div id="additional-photos">
+                <figure>
+                    <img src="./website-media/top-drawing.jpeg"></img>
+                    <figcaption>The top of the Etch A Sketch showing the USB power input going in and the drawing progam</figcaption>
+                </figure>
+                <figure>
+                    <img src="./website-media/top-back.jpeg"></img>
+                    <figcaption>The top of the Etch A Sketch showing the back as well</figcaption>
+                </figure>
+                <figure>
+                    <img src="./website-media/front-drawing.jpeg"></img>
+                    <figcaption>The Etch A Sketch mid-drawing</figcaption>
+                </figure>
+                <figure>
+                    <img src="./website-media/front-booting.jpeg"></img>
+                    <figcaption>The Etch A Sketch at the start of boot</figcaption>
+                </figure>
+                <figure>
+                    <img src="./website-media/internals-input.jpeg"></img>
+                    <figcaption>The internals of the input panel</figcaption>
+                </figure>
+                <figure>
+                    <img src="./website-media/internals-power.jpeg"></img>
+                    <figcaption>The internals of the top of th Etch A Sketch showing the USB PD module</figcaption>
+                </figure>
+                <figure>
+                    <img src="./website-media/internals-unfolded.jpeg"></img>
+                    <figcaption>The internals of the Etch A Sketch showing the power switch and AVR</figcaption>
+                </figure>
+                <figure>
+                    <img src="./website-media/internals-unfolded-far.jpeg"></img>
+                    <figcaption>The internals of the Etch A Sketch showing the AVR in the middle and the IMU to its right</figcaption>
+                </figure>
+            </div>
         </section>
 
         <section>
