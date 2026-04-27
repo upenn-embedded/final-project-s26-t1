@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                font-family: Georgia, serif;
+                max-width: 60em;
+                margin: auto;
+                padding: 1em;
+            }
+
+            h1, h2, h3 {
+                text-align: center;
+            }
+
+            figure {
+                text-align: center;
+            }
+
+            p {
+                text-align: justify;
+                text-indent: 2em;
+            }
+
+            img {
+                width: 100%;
+            }
+
+            a {
+                color: black;
+                text-decoration: none;
+                font-style: italic;
+            }
+
+            a:hover {
+                color: darkblue;
+                text-decoration: underline;
+            }
+
+            #team-members {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                column-gap: 1em;
+            }
+
+            #team-members > div {
+                overflow: hidden;
+            }
+
+            #team-members > div > p {
+                text-align: center;
+                text-indent: 0;
+            }
+
+            #team-members > div > div {
+                display: grid;
+                grid-template-columns: 1.5em max-content;
+                column-gap: 0.5em;
+                place-content: center;
+                align-items: center;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Digital Etch A Sketch</h1>
+        <figure>
+            <iframe src="https://drive.google.com/file/d/1Ipk-cZEMz2bkdB5PhEX0tyHs0H4efPDP/preview" width="416" height="349" allow="fullscreen"></iframe>
+            <figcaption>Video showcase by Elan Goldman</figcaption>
+        </figure>
+        <h2>The Team</h2>
+        <div id="team-members">
+            <div>
+                <h3>Cameron Shaw</h3>
+                <img src="./website-media/cameron-shaw.jpg"></img>
+                <p>AVR & USB Programming</p>
+                <div>
+                    <img src="https://cameronshaw.me/favicon.ico" alt="Personal Website" title="Personal Website"></img>
+                    <a href="https://cameronshaw.me">cameronshaw.me</a>
+                </div>
+            </div>
+            <div>
+                <h3>Clayton Hickey</h3>
+                <img src="./website-media/clayton-hickey.webp"></img>
+                <p>Etch A Sketch OS, This Website</p>
+                <div>
+                    <img src="https://claytonhickey.me/favicon.ico" alt="Personal Website" title="Personal Website"></img>
+                    <a href="https://claytonhickey.me">claytonhickey.me</a>
+                </div>
+            </div>
+            <div>
+                <h3>Elan Goldman</h3>
+                <img src="./website-media/elan-goldman.png"></img>
+                <p>Enclosure Design and Assembly</p>
+                <div>
+                    <img src="./website-media/elan-goldman.png" alt="Personal Website" title="Personal Website"></img>
+                    <a href="https://Elangoldman.com">Elangoldman.com</a>
+                </div>
+            </div>
+        </div>
+
+        <h2>A Full Operating System Configuration In A Single Image</h2>
+        <p>
+            By utilizing <a href="https://nixos.org">NixOS</a>, we were able to 
+        </p>
+    </body>
+</html>
