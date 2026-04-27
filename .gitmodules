@@ -1,0 +1,3 @@
+[submodule "website-libraries/viewstl"]
+	path = website-libraries/viewstl
+	url = git@github.com:omrips/viewstl.git
