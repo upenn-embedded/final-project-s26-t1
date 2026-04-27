@@ -44,6 +44,24 @@
                 text-decoration: underline;
             }
 
+            table {
+                border-collapse: collapse;
+                border-spacing: 0;
+                border: 1px solid black;
+                margin: 1em 0;
+            }
+
+            table caption {
+                border: 1px solid black;
+                font-weight: bold;
+                font-size: 1.5em;
+            }
+
+            th, td {
+                border: 1px solid black;
+                padding: 0.5em;
+            }
+
             .code {
                 background-color: #ddd;
                 font-family: 'Courier New', Courier, monospace;
@@ -181,6 +199,129 @@
                 <img src="./website-media/400x400-digital-etch-a-sketch.jpg" style="max-width: 30em;"></img>
                 <figcaption>400x400 photo taken by Elan of the OS dashboard made by Clayton running on the assembled Digital Etch A Sketch. Buttons from top-left to bottom-right: launch Etch Drawing Program, launch file explorer (pcmanfm-qt), working analog clock, battery power indicator (non-functional), storage usage indicator, file sync status (non-functional), WiFi (launch nmtui in Alacritty), web browser (defaults to <a href="https://garticphone.com/">Gartic Phone</a>)</figcaption>
             </figure>
+        </section>
+
+        <section>
+            <h2>Boring Stuff</h2>
+
+            <p style="text-align: center;">
+                Additional validation video taken by Elan: <a href="https://drive.google.com/file/d/1xZBz8Fc3XaYh0jO39mWrX5brnvkHbxKp/view">https://drive.google.com/file/d/1xZBz8Fc3XaYh0jO39mWrX5brnvkHbxKp/view</a>
+            </p>
+            <table>
+                <thead>
+                    <th scope="col">ID</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Outcome</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">SRS-01</th>
+                        <td>The device shall display and persist user-drawn lines on the display. The cursor shall remain at the boundary of the screen if a user attempts to move it beyond the display coordinates.</td>
+                        <td>Confirmed, see demonstration video for evidence of this.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">SRS-02</th>
+                        <td>The system shall update the cursor position based on simultaneous inputs from both knobs to do diagonal and curved line rendering.</td>
+                        <td>Confirmed, see demonstration video for evidence of this.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">SRS-03</th>
+                        <td>The system shall respond to knob rotations with a display latency of less than 100 milliseconds to ensure real-time user interaction.</td>
+                        <td>We only have anecdotal evidence of this due to limitations in our ability to accurately test end-to-end display latency.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">SRS-04</th>
+                        <td>Upon USB connection to a host PC, such as the MCU for the display, the device shall enumerate as a Human Interface Device (HID) and map knob rotations to mouse-drag and click events.</td>
+                        <td>Confirmed, AVR is connected to Raspberry Pi host PC as a HID. See main demonstration video as evidence and photos of inside of case showing USB connection.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">SRS-05</th>
+                        <td>The system shall monitor the IMU and trigger a screen-clear event only when a continuous shaking motion is detected for a duration exceeding 1 second.</td>
+                        <td>Confirmed, see demonstration video of this behavior.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">SRS-06</th>
+                        <td>The device shall indicate using separate LEDs whether the device is powered, whether left click hold is enabled, and whether shaking is detected.</td>
+                        <td>Confirmed, see main demonstration video for proof that each of these functions is present.</td>
+                    </tr>
+                </tbody>
+                <caption>Software Requirements</caption>
+            </table>
+
+            <table>
+                <thead>
+                    <th scope="col">ID</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Outcome</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">HRS-01</th>
+                        <td>The device shall be powered by a USB power bank and maintain operation for a minimum of 10 minutes under continuous use.</td>
+                        <td>Confirmed, device operated for greater than 10 minutes during the final demo.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">HRS-02</th>
+                        <td>The power management circuit shall maintain uninterrupted system operation during the transition of plugging or unplugging a USB-C cable.</td>
+                        <td>Not applicable since USB is not exposed for external computer connection.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">HRS-03</th>
+                        <td>A physical power switch shall be integrated to disconnect the battery from all downstream circuitry, resulting in zero current draw (excluding ambient battery discharge).</td>
+                        <td>Confirmed, switch is wired to be between main USB-C power port and Raspberry Pi as shown in photos.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">HRS-04</th>
+                        <td>The device enclosure shall feature two knobs positioned at the bottom corners of the display to emulate a mechanical drawing toy.</td>
+                        <td>Confirmed, see photos of device for validation.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">HRS-05</th>
+                        <td>The rotary encoders used for knobs shall be non-detented to provide smooth, continuous rotation without tactile clicks or bumps.</td>
+                        <td>Cannot be directly verified, but the Bourns rotary encoders used are detentless, and this was also verified by rotating the knobs.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">HRS-06</th>
+                        <td>The device chassis and internal component mounting shall withstand shaking without loss of electrical connectivity or functional failure.</td>
+                        <td>See main video demonstrating that device continues to function after shaking.</td>
+                    </tr>
+                </tbody>
+                <caption>Hardware Requirements</caption>
+            </table>
+
+            <table>
+                <thead>
+                    <th scope="col">Question</th>
+                    <th scope="col">Response</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">What did you learn from it?</th>
+                        <td>We learned a great deal about USB and the complexities of building a device that uses this protocol instead of a simpler protocol like I2C. The desire to use USB informed many of our design decisions, and we had to understand the report structure for USB human interface devices to successfully communicate.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">What went well?</th>
+                        <td>Our planning for unforeseen circumstances such as the e-ink display not arriving before the deadline provided to be quite useful, since this did unfortunately end up occuring. Because we had been careful to acquire an alternative 6" TFT display to be driven by the Raspberry Pi, we were able to present a polished project at the final demo.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">What accomplishments are you proud of?</th>
+                        <td>We are proud of the custom Etch-a-Sketch OS, since its functionality goes far beyond or original expectations/goals for the project. The OS supports browsing websites, which can be useful for playing drawing games such as Skribbl.io, Wi-Fi configuration, file storage, and even a clock in the main menu. This is a very special part of the project for us, and we are quite proud of it.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Did you have to change your approach?</th>
+                        <td>We originally planned to use an e-ink diplay due to its ability to replicate the same look and feel as an original Etch-a-Sketch. We realized early on in the project, however, that the refresh rate would be greater than 3Hz for many displays, making the design unfeasable for us. This changed, however, when we discoverd the Modos 7" Dev Kit, which has a refresh rate of up to 75Hz. We were not able to obtain the display in time, but our backup plan with a 6" TFT display was already in place when this became apparent.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">What could have been done differently?</th>
+                        <td>We could have used I2C to communicate between the Raspberry Pi and AVR to allow for additional connectivity via USB to a host PC. The primary reason us not going this route was to avoid time cost and redundancy.. in retrospect, using I2C between the RPI and AVR would have been straightforward to switch to, but certainly easier if this decision was made earlier on in the process.</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">What could be the next step for this project?</th>
+                        <td>We would like to improve the device mainly in its hardware by swapping the TFT display to a high-refresh rate e-ink display. We would also like to improve the wiring in some parts of the device. Lastly, we could improve the usability of the OS, prioritizing the 4 buttons and 2 knobs we are able to reprogram.</td>
+                    </tr>
+                </tbody>
+                <caption>Conclusion Questions</caption>
+            </table>
         </section>
 
         <footer>
