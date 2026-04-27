@@ -167,145 +167,128 @@ images & videos: [https://github.com/upenn-embedded/final-project-s26-t1/tree/ma
 We did not make a slide deck
 
 ### MVP Requirements
+
 1. Show a system block diagram & explain the hardware implementation.
-    1. https://drive.google.com/file/d/1pIQUzEnvfFoCIa2VsQYxRrLAcQYWJmim/view?usp=sharing
-    1. AVR Microcontroller
-        1. Reads our rotary encoder inputs and translates them to USB HID Mice
-        1. Reads our button inputs and interprets them USB HID Keyboard
-        1. Reads shaking from the IMU and sends those events through the USB HID Keyboard interface
-        1. Sends the USB HID events to our RPI 4B
-        1. (unimplemented) 3 LEDs shows power, shaking, and whether left click is held
-    1. RPI 4B
-        1. Takes the USB HID events
-        1. Boots off of custom Etch A Sketch OS image on SD Card
-        1. WiFI Connection for debugging
-        1. Outputs to the display
+   1. https://drive.google.com/file/d/1pIQUzEnvfFoCIa2VsQYxRrLAcQYWJmim/view?usp=sharing
+   1. AVR Microcontroller
+      1. Reads our rotary encoder inputs and translates them to USB HID Mice
+      1. Reads our button inputs and interprets them USB HID Keyboard
+      1. Reads shaking from the IMU and sends those events through the USB HID Keyboard interface
+      1. Sends the USB HID events to our RPI 4B
+      1. (unimplemented) 3 LEDs shows power, shaking, and whether left click is held
+   1. RPI 4B
+      1. Takes the USB HID events
+      1. Boots off of custom Etch A Sketch OS image on SD Card
+      1. WiFI Connection for debugging
+      1. Outputs to the display
 1. Explain your firmware implementation, including application logic and critical drivers you've written.
-    1. AVR (baremetal C)
-        1. Main file is main_usb.c, containing a simple loop for sending I2C commands to IMU and processing USB HID reports.
-        2. Timer B is configured to run every ~1ms in CCMP mode. The interrupt for this timer gets the state of the rotary encoders and updates the mouse delta.
-        3. Port F (Pin Change) Interrupt is configured for the 4 buttons on both edges (except for the left click hold button which is falling edge).
-        4. Created `usb_driver.c`, a USB HID driver with support for sending mouse and keyboard reports on the same endpoint, which is not supported in the MCC library).
-            1. Primarily uses the MCC library USBDevice_Handle() and USB_TransferWriteStart() functions.
-            2. Supports asynchronous processing of reports: `main_usb.c` can set the next keyboard press or mouse movement but driver will not send until `Process_USB_Reports` is called in the main loop.
-        5. Created `i2c_driver.c`, which supports synchronous and asynchronous I2C reads and writes. Commands are specified in a struct that is then updated as it proceeds through the I2C protocol steps.
-        6. Created `imu_driver.c`, which is built on top of `i2c_driver.c`.
-            1. Contains an Initialize function to configure the Wake-Up Event on the LSM6DSO.
-            2. Contains a detect_shake_event() to read from the wake-up interrupt register on the LSM6DSO to see if a wake-up event occurred.
-            3. Maintains a counter so that multiple (short) wake-up events occur before a (long) shake event is detected.
-    1. RPI 4B
-        1. Runs custom "[Etch A Sketch OS](./rpi-install)"
-            1. Based on [NixOS](https://nixos.org/)
-                1. "Patched" with [nix-hardware](https://github.com/nixos/nixos-hardware) to get the DSI display and GPU working
-            1. Everything pre-configured on flashable image for a vendored OS-like experience
-                1. Image rebuilt with a single command `nix build .#packages.aarch64-linux.rpi4B-img`, only requiring [Nix](https://nixos.org/download/) to be installed
-                1. Build artifact: https://drive.google.com/file/d/1Ibafn8uE3A1nxN8xKzGDzw4241MuhPFP/view?usp=sharing
-            1. Logs in to AirPennNet-Device WiFi automatically
-            1. Registers itself as `etch-a-sketch.local` on mDNS, DNS-SD, and Bonjour to avoid problems with dynamic IP addressing
-            1. OpenSSH enabled for remote development without re-flashing
-            1. Uses [Nix Wrapper Modules](https://github.com/BirdeeHub/nix-wrapper-modules) to make OS elements portable between systems (allows rapid testing on development machine)
-            1. Uses customized [Niri](https://github.com/niri-wm/niri) as a lightweight display 
-                1. Pinned to a specific commit to get on-screen keyboard support, avoiding its [temporary removal](https://github.com/nixos/nixos-hardware) (and it was never part of an official release)
-                1. Interprets and acts on hotkeys
-                    1. `Super+Enter`: open terminal
-                    1. `Super+Q`: exit current app
-                    1. `Super+K`: toggle on-screen keyboard
-                    1. `Super+F`: toggle current app fullscreen
-            1. Uses customized [Eww](https://github.com/elkowar/eww) to make the vendor-like dashboard
-                1. Required [PR](https://github.com/BirdeeHub/nix-wrapper-modules/pull/420) to be able to wrap it to make the configuration portable (runs on development machine as well)
-                1. Custom icons
-            1. Uses custmized [Yaru](https://github.com/ubuntu/yaru) theme to make the cursor mimic a real Etch A Sketch cursor
-            1. Uses [wvkbd](https://github.com/jjsullivan5196/wvkbd) for on-screen keyboard
-                1. Required cherry-picking from unstable branch of [nixpkgs](https://github.com/nixos/nixpkgs) to get the version that works with Wayland
-        1. Runs custom [Etch](./etch) drawing program for a minimal Etch A Sketch-like experience
-            1. Programmed in [Rust](https://rust-lang.org/)
-            1. Uses [Egui/Eframe](https://github.com/emilk/egui), a native GUI framework
-                1. It's dependency, WGPU, had to be [forked](https://github.com/clay53/wgpu) to fix bug causing it to [fail on Raspberry Pi](https://github.com/gfx-rs/wgpu/issues/9293) and set the version Egui expects
-                1. It had to be [forked](https://github.com/clay53/egui) to make it compatible with the in-development branch of WGPU
-            1. Always draws following the mouse
-            1. Erases with `Ctrl+Z` (sent when IMU detects shaking)
+   1. AVR (baremetal C)
+      1. Main file is main_usb.c, containing a simple loop for sending I2C commands to IMU and processing USB HID reports.
+      2. Timer B is configured to run every ~1ms in CCMP mode. The interrupt for this timer gets the state of the rotary encoders and updates the mouse delta.
+      3. Port F (Pin Change) Interrupt is configured for the 4 buttons on both edges (except for the left click hold button which is falling edge).
+      4. Created `usb_driver.c`, a USB HID driver with support for sending mouse and keyboard reports on the same endpoint, which is not supported in the MCC library).
+         1. Primarily uses the MCC library USBDevice_Handle() and USB_TransferWriteStart() functions.
+         2. Supports asynchronous processing of reports: `main_usb.c` can set the next keyboard press or mouse movement but driver will not send until `Process_USB_Reports` is called in the main loop.
+      5. Created `i2c_driver.c`, which supports synchronous and asynchronous I2C reads and writes. Commands are specified in a struct that is then updated as it proceeds through the I2C protocol steps.
+      6. Created `imu_driver.c`, which is built on top of `i2c_driver.c`.
+         1. Contains an Initialize function to configure the Wake-Up Event on the LSM6DSO.
+         2. Contains a detect_shake_event() to read from the wake-up interrupt register on the LSM6DSO to see if a wake-up event occurred.
+         3. Maintains a counter so that multiple (short) wake-up events occur before a (long) shake event is detected.
+   1. RPI 4B
+      1. Runs custom "[Etch A Sketch OS](./rpi-install)"
+         1. Based on [NixOS](https://nixos.org/)
+            1. "Patched" with [nix-hardware](https://github.com/nixos/nixos-hardware) to get the DSI display and GPU working
+         1. Everything pre-configured on flashable image for a vendored OS-like experience
+            1. Image rebuilt with a single command `nix build .#packages.aarch64-linux.rpi4B-img`, only requiring [Nix](https://nixos.org/download/) to be installed
+            1. Build artifact: https://drive.google.com/file/d/1Ibafn8uE3A1nxN8xKzGDzw4241MuhPFP/view?usp=sharing
+         1. Logs in to AirPennNet-Device WiFi automatically
+         1. Registers itself as `etch-a-sketch.local` on mDNS, DNS-SD, and Bonjour to avoid problems with dynamic IP addressing
+         1. OpenSSH enabled for remote development without re-flashing
+         1. Uses [Nix Wrapper Modules](https://github.com/BirdeeHub/nix-wrapper-modules) to make OS elements portable between systems (allows rapid testing on development machine)
+         1. Uses customized [Niri](https://github.com/niri-wm/niri) as a lightweight display
+            1. Pinned to a specific commit to get on-screen keyboard support, avoiding its [temporary removal](https://github.com/nixos/nixos-hardware) (and it was never part of an official release)
+            1. Interprets and acts on hotkeys
+               1. `Super+Enter`: open terminal
+               1. `Super+Q`: exit current app
+               1. `Super+K`: toggle on-screen keyboard
+               1. `Super+F`: toggle current app fullscreen
+         1. Uses customized [Eww](https://github.com/elkowar/eww) to make the vendor-like dashboard
+            1. Required [PR](https://github.com/BirdeeHub/nix-wrapper-modules/pull/420) to be able to wrap it to make the configuration portable (runs on development machine as well)
+            1. Custom icons
+         1. Uses custmized [Yaru](https://github.com/ubuntu/yaru) theme to make the cursor mimic a real Etch A Sketch cursor
+         1. Uses [wvkbd](https://github.com/jjsullivan5196/wvkbd) for on-screen keyboard
+            1. Required cherry-picking from unstable branch of [nixpkgs](https://github.com/nixos/nixpkgs) to get the version that works with Wayland
+      1. Runs custom [Etch](./etch) drawing program for a minimal Etch A Sketch-like experience
+         1. Programmed in [Rust](https://rust-lang.org/)
+         1. Uses [Egui/Eframe](https://github.com/emilk/egui), a native GUI framework
+            1. It's dependency, WGPU, had to be [forked](https://github.com/clay53/wgpu) to fix bug causing it to [fail on Raspberry Pi](https://github.com/gfx-rs/wgpu/issues/9293) and set the version Egui expects
+            1. It had to be [forked](https://github.com/clay53/egui) to make it compatible with the in-development branch of WGPU
+         1. Always draws following the mouse
+         1. Erases with `Ctrl+Z` (sent when IMU detects shaking)
 1. Demo your device.
-    1. ![](./mvp-media/Drawing.jpg)
-    1. ![](./mvp-media/Assembled.jpg)
+   1. ![](./mvp-media/Drawing.jpg)
+   1. ![](./mvp-media/Assembled.jpg)
 1. Have you achieved some or all of your Software Requirements Specification (SRS)?
-    * [x] SRS-01
-    * [x] SRS-02
-    * [x] SRS-03
-    * [x] SRS-04
-    * [ ] SRS-05
-        * Still need to make it so shake detection is over 1 second
-    * [ ] SRS-06
-        * This software requirement has been abandoned in favor of a black/white screen
+   - [x] SRS-01
+   - [x] SRS-02
+   - [x] SRS-03
+   - [x] SRS-04
+   - [ ] SRS-05
+     - Still need to make it so shake detection is over 1 second
+   - [ ] SRS-06
+     - This software requirement has been abandoned in favor of a black/white screen
 1. Show how you collected data and the outcomes.
-    1. All of these are qualitative, so we just tested it: [./mvp-media](/mvp-media/)
+   1. All of these are qualitative, so we just tested it: [./mvp-media](/mvp-media/)
 1. Have you achieved some or all of your Hardware Requirements Specification (HRS)?
-    * [x] HRS-01
-        * Lasts a long time with our USB battery pack
-    * [x] HRS-02
-    * [x] HRS-03
-    * [x] HRS-04
-    * [x] HRS-05
-    * [ ] HRS-06
-        * Wires not connected strongly yet
+   - [x] HRS-01
+     - Lasts a long time with our USB battery pack
+   - [x] HRS-02
+   - [x] HRS-03
+   - [x] HRS-04
+   - [x] HRS-05
+   - [ ] HRS-06
+     - Wires not connected strongly yet
 1. Show how you collected data and the outcomes.
-    1. For the battery pack lifespan, we ran it for like an hour waiting to demo and it barely went down
-    1. Everything else is qualitative and we know by looking at it/shaking it
+   1. For the battery pack lifespan, we ran it for like an hour waiting to demo and it barely went down
+   1. Everything else is qualitative and we know by looking at it/shaking it
 1. Show off the remaining elements that will make your project whole: mechanical casework, supporting graphical user interface (GUI), web portal, etc.
-    1. Everything fits nicely in the case
+   1. Everything fits nicely in the case
 1. What is the riskiest part remaining of your project?
-    1. The riskiest part is whether or not the E-Ink display arrives in time.
+   1. The riskiest part is whether or not the E-Ink display arrives in time.
 1. How do you plan to de-risk this?
-    1. It probably won't arrive, so we will design our final enclosure around the LCD we've been using as a backup
+   1. It probably won't arrive, so we will design our final enclosure around the LCD we've been using as a backup
 1. What questions or help do you need from the teaching team?
-    1. None
+   1. None
 
 ### What to do before final demo
-* Polish OS
-    * Implement hands of the clock
-    * Implement showing stength of WiFI signal
-    * Implement text for storage usage
-    * Implement file syncing (probably with WebDAV)
-    * Create custom wvkbd layout that makes more sense for our application
-* Polish drawing app
-    * Each "erase" should erase the image gradually, lightening it, instead of completely erasing it like a real etch a sketch
-    * Automatic saves and reloads
-* Finalize and stengthen enclosure
-    * Need better method to route USB cabels - probably buying a right angle connector
-    * Need everything to fit
-    * Make knobs grippier
-    * Attach internal wires more securely
-* Finish AVR I/O
-    * Implement LEDs
-    * Implement other 2 buttons
- 
-### 5. Updated Software Requirements Specification (SRS)
 
-| ID         | Description                                                                                                                                                                               |
-| :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **SRS-01** | The device shall display and persist user-drawn lines on the display. The cursor shall remain at the boundary of the screen if a user attempts to move it beyond the display coordinates. |
-| **SRS-02** | The system shall update the cursor position based on simultaneous inputs from both knobs to do diagonal and curved line rendering.                                                        |
-| **SRS-03** | The system shall respond to knob rotations with a display latency of less than 100 milliseconds to ensure real-time user interaction.                                                     |
-| **SRS-04** | Upon USB connection to a host PC, such as the MCU for the display, the device shall enumerate as a Human Interface Device (HID) and map knob rotations to mouse-drag and click events.    |
-| **SRS-05** | The system shall monitor the IMU and trigger a screen-clear event only when a continuous shaking motion is detected for a duration exceeding 1 second.                                    |
-| **SRS-06** | The device shall indicate using separate LEDs whether the device is powered, whether left click hold is enabled, and whether shaking is detected.                                         |
+- Polish OS
+  - Implement hands of the clock
+  - Implement showing stength of WiFI signal
+  - Implement text for storage usage
+  - Implement file syncing (probably with WebDAV)
+  - Create custom wvkbd layout that makes more sense for our application
+- Polish drawing app
+  - Each "erase" should erase the image gradually, lightening it, instead of completely erasing it like a real etch a sketch
+  - Automatic saves and reloads
+- Finalize and stengthen enclosure
+  - Need better method to route USB cabels - probably buying a right angle connector
+  - Need everything to fit
+  - Make knobs grippier
+  - Attach internal wires more securely
+- Finish AVR I/O
+  - Implement LEDs
+  - Implement other 2 buttons
 
-### Updated Hardware Requirements Specification (HRS)
+## Final Demo
 
-**Definitions, Abbreviations**
+Updates since MVP:
 
-- **USB:** Universal Serial Bus
-- **PC:** Personal Computer
-- **HID:** Human Interface Device
-- **IMU:** Inertial Measurement Unit
-
-| ID         | Description                                                                                                                                                                |
-| :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **HRS-01** | The device shall be powered by a USB power bank and maintain operation for a minimum of 10 minutes under continuous use.                                                   |
-| **HRS-02** | The power management circuit shall maintain uninterrupted system operation during the transition of plugging or unplugging a USB-C cable.                                  |
-| **HRS-03** | A physical power switch shall be integrated to disconnect the battery from all downstream circuitry, resulting in zero current draw (excluding ambient battery discharge). |
-| **HRS-04** | The device enclosure shall feature two knobs positioned at the bottom corners of the display to emulate a mechanical drawing toy.                                          |
-| **HRS-05** | The rotary encoders used for knobs shall be non-detented to provide smooth, continuous rotation without tactile clicks or bumps.                                           |
-| **HRS-06** | The device chassis and internal component mounting shall withstand shaking without loss of electrical connectivity or functional failure.                                  |
+- IMU sensitivity adjusted
+- Clock in Etch a Sketch OS
+- Saving/loading drawings to local filesystem supported now
+- New case and improved wiring
+- Added left click hold button, quit/open button, and indicator LEDs
 
 ## Final Report
 
@@ -320,17 +303,50 @@ If you’ve never made a GitHub pages website before, you can follow this webpag
 
 #### 3.1 Software Requirements Specification (SRS) Results
 
-| ID     | Description                                                                                               | Validation Outcome                                                                          |
-| ------ | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| SRS-01 | The IMU 3-axis acceleration will be measured with 16-bit depth every 100 milliseconds +/-10 milliseconds. | Confirmed, logged output from the MCU is saved to "validation" folder in GitHub repository. |
+| ID         | Description                                                                                                                                                                               | Validation Outcome                                                                                                                                          |
+| :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SRS-01** | The device shall display and persist user-drawn lines on the display. The cursor shall remain at the boundary of the screen if a user attempts to move it beyond the display coordinates. | Confirmed, see demonstration video for evidence of this.                                                                                                    |
+| **SRS-02** | The system shall update the cursor position based on simultaneous inputs from both knobs to do diagonal and curved line rendering.                                                        | Confirmed, see demonstration video for evidence of this.                                                                                                    |
+| **SRS-03** | The system shall respond to knob rotations with a display latency of less than 100 milliseconds to ensure real-time user interaction.                                                     | We only have anecdotal evidence of this due to limitations in our ability to accurately test end-to-end display latency.                                    |
+| **SRS-04** | Upon USB connection to a host PC, such as the MCU for the display, the device shall enumerate as a Human Interface Device (HID) and map knob rotations to mouse-drag and click events.    | Confirmed, AVR is connected to Raspberry Pi host PC as a HID. See main demonstration video as evidence and photos of inside of case showing USB connection. |
+| **SRS-05** | The system shall monitor the IMU and trigger a screen-clear event only when a continuous shaking motion is detected for a duration exceeding 1 second.                                    | Confirmed, see demonstration video of this behavior.                                                                                                        |
+| **SRS-06** | The device shall indicate using separate LEDs whether the device is powered, whether left click hold is enabled, and whether shaking is detected.                                         | Confirmed, see main demonstration video for proof that each of these functions is present.                                                                  |
 
 #### 3.2 Hardware Requirements Specification (HRS) Results
 
-| ID     | Description                                                                                                                        | Validation Outcome                                                                                                      |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| HRS-01 | A distance sensor shall be used for obstacle detection. The sensor shall detect obstacles at a maximum distance of at least 10 cm. | Confirmed, sensed obstacles up to 15cm. Video in "validation" folder, shows tape measure and logged output to terminal. |
-|        |                                                                                                                                    |                                                                                                                         |
+| ID         | Description                                                                                                                                                                | Validation Outcome                                                                                                                 |
+| :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **HRS-01** | The device shall be powered by a USB power bank and maintain operation for a minimum of 10 minutes under continuous use.                                                   | Confirmed, device operated for greater than 10 minutes during the final demo.                                                      |
+| **HRS-02** | The power management circuit shall maintain uninterrupted system operation during the transition of plugging or unplugging a USB-C cable.                                  | Not applicable since USB is not exposed for external computer connection.                                                          |
+| **HRS-03** | A physical power switch shall be integrated to disconnect the battery from all downstream circuitry, resulting in zero current draw (excluding ambient battery discharge). | Confirmed, switch is wired to be between main USB-C power port and Raspberry Pi as shown in photos.                                |
+| **HRS-04** | The device enclosure shall feature two knobs positioned at the bottom corners of the display to emulate a mechanical drawing toy.                                          | Confirmed, see photos of device for validation.                                                                                    |
+| **HRS-05** | The rotary encoders used for knobs shall be non-detented to provide smooth, continuous rotation without tactile clicks or bumps.                                           | Cannot be directly verified, but the Bourns rotary encoders used are detentless, and this was also verified by rotating the knobs. |
+| **HRS-06** | The device chassis and internal component mounting shall withstand shaking without loss of electrical connectivity or functional failure.                                  | See main video demonstrating that device continues to function after shaking.                                                      |
 
 ### 4. Conclusion
+
+#### What did you learn from it?
+
+We learned a great deal about USB and the complexities of building a device that uses this protocol instead of a simpler protocol like I2C. The desire to use USB informed many of our design decisions, and we had to understand the report structure for USB human interface devices to successfully communicate.
+
+#### What went well?
+
+Our planning for unforeseen circumstances such as the e-ink display not arriving before the deadline provided to be quite useful, since this did unfortunately end up occuring. Because we had been careful to acquire an alternative 6" TFT display to be driven by the Raspberry Pi, we were able to present a polished project at the final demo.
+
+#### What accomplishments are you proud of?
+
+We are proud of the custom Etch-a-Sketch OS, since its functionality goes far beyond or original expectations/goals for the project. The OS supports browsing websites, which can be useful for playing drawing games such as Skribbl.io, Wi-Fi configuration, file storage, and even a clock in the main menu. This is a very special part of the project for us, and we are quite proud of it.
+
+#### Did you have to change your approach?
+
+We originally planned to use an e-ink diplay due to its ability to replicate the same look and feel as an original Etch-a-Sketch. We realized early on in the project, however, that the refresh rate would be greater than 3Hz for many displays, making the design unfeasable for us. This changed, however, when we discoverd the Modos 7" Dev Kit, which has a refresh rate of up to 75Hz. We were not able to obtain the display in time, but our backup plan with a 6" TFT display was already in place when this became apparent.
+
+#### What could have been done differently?
+
+We could have used I2C to communicate between the Raspberry Pi and AVR to allow for additional connectivity via USB to a host PC. The primary reason us not going this route was to avoid time cost and redundancy.. in retrospect, using I2C between the RPI and AVR would have been straightforward to switch to, but certainly easier if this decision was made earlier on in the process.
+
+#### What could be the next step for this project?
+
+We would like to improve the device mainly in its hardware by swapping the TFT display to a high-refresh rate e-ink display. We would also like to improve the wiring in some parts of the device. Lastly, we could improve the usability of the OS, prioritizing the 4 buttons and 2 knobs we are able to reprogram.
 
 ## References
