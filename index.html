@@ -6,9 +6,10 @@
         <style>
             body {
                 font-family: Georgia, serif;
-                max-width: 60em;
+                max-width: min(100vw, 60em);
                 margin: auto;
                 padding: 1em;
+                overflow-x: hidden;
             }
 
             h1, h2, h3 {
@@ -22,6 +23,10 @@
             p {
                 text-align: justify;
                 text-indent: 2em;
+            }
+            
+            span {
+                text-indent: 0;
             }
 
             img {
@@ -37,6 +42,15 @@
             a:hover {
                 color: #666;
                 text-decoration: underline;
+            }
+
+            .code {
+                background-color: #ddd;
+                font-family: 'Courier New', Courier, monospace;
+                white-space: nowrap;
+                overflow-x: scroll;
+                display: inline-block;
+                max-width: 100%;
             }
 
             #team-members {
@@ -137,13 +151,36 @@
                     filename: "../../../enclosure/bottom.stl",
                 }]});
             </script>
+
+            <p>
+                Clayton, with help from Elan, designed the 3D-printable knobs with FreeCAD, an open-source CAD program, to slide onto the rotary encoders.
+            </p>
+            <figure>
+                <div id="knob"></div>
+                <figcaption><a href="./enclosure/knob.stl">Knob</a> designed by Clayton Hickey</figcaption>
+            </figure>
+            <script>
+                new StlViewer(knob, {models: [{
+                    id: 0,
+                    filename: "../../../enclosure/knob.stl",
+                }]});
+            </script>
         </section>
 
         <section>
             <h2>A Full Operating System Configuration In A Single Image</h2>
             <p>
-                By utilizing <a href="https://nixos.org">NixOS</a>, we were able to 
+                By utilizing <a href="https://nixos.org">NixOS</a> and <a href="https://birdeehub.github.io/nix-wrapper-modules/md/intro.html">nix-wrapper-modules</a>, Clayton was able to create both an <a href="https://drive.google.com/file/d/1cPi8eAtnI3Z6LxbWIIDX8VDmbkdWqnhz/view">operating system image</a> for the Raspberry Pi 4B with all programs pre-installed and configured and a portable binary to run the fully configured desktop environment on any Linux TTY with Nix installed: <span class="code">nix run github:upenn-embedded/final-project-s26-t1#niri-wrapped</span>.
             </p>
+
+            <p>
+                Clayton's custom desktop shell uses the lightweight window manager/Wayland Compositor <a href="https://github.com/niri-wm/niri">Niri</a> and the Widget manager <a href="https://github.com/elkowar/eww">Eww</a> to make the Etch A Sketch-like dashboard. The Eww wrapper module was <a href="https://github.com/BirdeeHub/nix-wrapper-modules/pull/420">contributed upstream</a> to the nix-wrapper-modules project by Clayton.
+            </p>
+
+            <figure>
+                <img src="./website-media/400x400-digital-etch-a-sketch.jpg" style="max-width: 30em;"></img>
+                <figcaption>400x400 photo taken by Elan of the OS dashboard made by Clayton running on the assembled Digital Etch A Sketch. Buttons from top-left to bottom-right: launch Etch Drawing Program, launch file explorer (pcmanfm-qt), working analog clock, battery power indicator (non-functional), storage usage indicator, file sync status (non-functional), WiFi (launch nmtui in Alacritty), web browser (defaults to <a href="https://garticphone.com/">Gartic Phone</a>)</figcaption>
+            </figure>
         </section>
     </body>
 </html>
