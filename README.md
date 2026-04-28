@@ -297,7 +297,11 @@ If you’ve never made a GitHub pages website before, you can follow this webpag
 
 ### 1. Video
 
+See website or media folder for demo video.
+
 ### 2. Images
+
+See website or media folder for images.
 
 ### 3. Results
 
@@ -354,3 +358,4 @@ We would like to improve the device mainly in its hardware by swapping the TFT d
 - [TI I2C Application Report](https://www.ti.com/lit/an/slva704/slva704.pdf)
 - [MCC library for UART](https://onlinedocs.microchip.com/oxy/GUID-5A03F818-B7FC-4062-9792-57D08543B586-en-US-11/index.html) (used for debugging purposes only)
 - [Microchip USB HID Communication Demo Code](https://github.com/microchip-pic-avr-examples/avr64du32-cnano-usb-hid-keyboard-mplab-mcc)
+  - We used this demo code to understand how the MCC library for USB HID works. At a high level, the library creates multiple abstraction layers for the USB interface, handling device descriptors, read/write transfers, and the USB report structure. The library performs the initial handshake with the host to identify itself as a mouse/keyboard HID. USB peripherals like the one we created work by responding to requests from the host with a report containing the keys that are currently pressed and any mouse movements. The original MCC generated code does not support mouse and keyboard simultaneously, so we added support for this by updating `usb/usb_descriptors.c` to include a larger report with separate mouse and keyboard collections. The `usb_driver.c` we wrote then uses `USB_TransferWriteStart()` to send mouse or keyboard reports, alternating between the two.
