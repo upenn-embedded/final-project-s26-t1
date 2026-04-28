@@ -373,32 +373,32 @@
                     <tr>
                         <th scope="row">SRS-01</th>
                         <td>The device shall display and persist user-drawn lines on the display. The cursor shall remain at the boundary of the screen if a user attempts to move it beyond the display coordinates.</td>
-                        <td>Confirmed, see demonstration video for evidence of this.</td>
+                        <td>Validated, see demonstration video for evidence of this.</td>
                     </tr>
                     <tr>
                         <th scope="row">SRS-02</th>
                         <td>The system shall update the cursor position based on simultaneous inputs from both knobs to do diagonal and curved line rendering.</td>
-                        <td>Confirmed, see demonstration video for evidence of this.</td>
+                        <td>Validated, see demonstration video for evidence of this.</td>
                     </tr>
                     <tr>
                         <th scope="row">SRS-03</th>
                         <td>The system shall respond to knob rotations with a display latency of less than 100 milliseconds to ensure real-time user interaction.</td>
-                        <td>We only have anecdotal evidence of this due to limitations in our ability to accurately test end-to-end display latency.</td>
+                        <td>Confirmed, see demonstration video for anecdotal evidence.</td>
                     </tr>
                     <tr>
                         <th scope="row">SRS-04</th>
                         <td>Upon USB connection to a host PC, such as the MCU for the display, the device shall enumerate as a Human Interface Device (HID) and map knob rotations to mouse-drag and click events.</td>
-                        <td>Confirmed, AVR is connected to Raspberry Pi host PC as a HID. See main demonstration video as evidence and photos of inside of case showing USB connection.</td>
+                        <td>Partially satisfied, AVR is connected to Raspberry Pi host PC as a HID. See main demonstration video as evidence and photos of inside of case showing USB connection.</td>
                     </tr>
                     <tr>
                         <th scope="row">SRS-05</th>
                         <td>The system shall monitor the IMU and trigger a screen-clear event only when a continuous shaking motion is detected for a duration exceeding 1 second.</td>
-                        <td>Confirmed, see demonstration video of this behavior.</td>
+                        <td>Validated, see demonstration video of this behavior.</td>
                     </tr>
                     <tr>
                         <th scope="row">SRS-06</th>
                         <td>The device shall indicate using separate LEDs whether the device is powered, whether left click hold is enabled, and whether shaking is detected.</td>
-                        <td>Confirmed, see main demonstration video for proof that each of these functions is present.</td>
+                        <td>Validated, see main video for proof that each of these functions is present. (This requirement is a revision of the original color switch requirement.)</td>
                     </tr>
                 </tbody>
                 <caption>Software Requirements</caption>
@@ -429,17 +429,17 @@
                     <tr>
                         <th scope="row">HRS-04</th>
                         <td>The device enclosure shall feature two knobs positioned at the bottom corners of the display to emulate a mechanical drawing toy.</td>
-                        <td>Confirmed, see photos of device for validation.</td>
+                        <td>Validated, see photos of device and validation video.</td>
                     </tr>
                     <tr>
                         <th scope="row">HRS-05</th>
                         <td>The rotary encoders used for knobs shall be non-detented to provide smooth, continuous rotation without tactile clicks or bumps.</td>
-                        <td>Cannot be directly verified, but the Bourns rotary encoders used are detentless, and this was also verified by rotating the knobs.</td>
+                        <td>Validated by physically rotating the knobs and observing no noticeable clicks. Furthermore, the Bourns rotary encoders we used do not have detents.</td>
                     </tr>
                     <tr>
                         <th scope="row">HRS-06</th>
                         <td>The device chassis and internal component mounting shall withstand shaking without loss of electrical connectivity or functional failure.</td>
-                        <td>See main video demonstrating that device continues to function after shaking.</td>
+                        <td>Validated, see demonstration that device continues to function after shaking in the main video.</td>
                     </tr>
                 </tbody>
                 <caption>Hardware Requirements</caption>
@@ -478,10 +478,17 @@
                 </tbody>
                 <caption>Conclusion Questions</caption>
             </table>
+
+            <h3>References</h3>
+            <ul>
+                <li><a src="https://www.ti.com/lit/an/slva704/slva704.pdf">TI I2C Application Report</a></li>
+                <li><a src="https://onlinedocs.microchip.com/oxy/GUID-5A03F818-B7FC-4062-9792-57D08543B586-en-US-11/index.html">MCC library for UART</a> (used for debugging purposes only)</li>
+                <li><a src="https://github.com/microchip-pic-avr-examples/avr64du32-cnano-usb-hid-keyboard-mplab-mcc">Microchip USB HID Communication Demo Code</a></li>
+            </ul>
         </section>
 
         <footer>
-            <a href="https://github.com/upenn-embedded/final-project-s26-t1"><img src="./website-media/GitHub_Invertocat_Black.svg" style="width: 2em"></img></a>
+            <a href="https://github.com/upenn-embedded/final-project-s26-t1"><img src="./website-media/GitHub_Invertocat_Black.svg" style="width: 2em; text-align: center;"></img></a>
             <p>This is not an official product, we do not intend to infringe on the trademarks of Etch A Sketch. Where operating systems not requiring age verification are illegal, do not use the provided operating system (though it may not count legally as there is no app store or user accounts).</p>
         </footer>
     </body>
